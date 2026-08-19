@@ -1,8 +1,11 @@
 {
+  "domain": "quanlyttsx.is-cool.dev",
+  "provider": "Open Domains",
   "owner": {
     "username": "nguyenlinhns-arch"
   },
   "records": {
-    "URL": "https://nguyenlinhns-arch.github.io/quanlyttsx/"
-  }
+    "CNAME": "nguyenlinhns-arch.github.io"
+  },
+  "site": "https://nguyenlinhns-arch.github.io/quanlyttsx/"
 }
