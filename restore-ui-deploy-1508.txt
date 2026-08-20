@@ -1,0 +1,1 @@
+Restore original dashboard UI + stable _WEB_CORE recovery. 2026-08-20 15:08 ICT
