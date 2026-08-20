@@ -39,4 +39,10 @@
     }
     return {raw,coreOnly,companies,provinces};
   };
+
+  function rerunWithV2(){
+    if(state.refreshing){setTimeout(rerunWithV2,500);return;}
+    refresh();
+  }
+  setTimeout(rerunWithV2,750);
 })();
