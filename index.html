@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Dashboard TTSX TKV · V4</title>
+<title>Dashboard TTSX TKV</title>
 <link rel="stylesheet" href="styles.css?v=20260820-1208">
 <style>
 .filter-grid-5{grid-template-columns:repeat(5,minmax(150px,1fr))}
@@ -29,6 +29,7 @@
 <label><span>Đơn vị tuyển</span><select id="recruitment"><option value="">Tất cả</option></select></label>
 <label><span>Công trường/đơn vị</span><select id="unit"><option value="">Tất cả</option></select></label>
 </div></section>
+
 <section class="section"><div class="section-title"><div><h2>Tổng quan điều hành</h2><p id="scope">Toàn bộ dữ liệu</p></div><p id="updated">Đang đồng bộ...</p></div><div class="kpis">
 <div class="kpi blue"><small>Tổng HS đi TTSX</small><strong id="kTotal">1.432</strong><em>Đang thực tập + Bỏ TTSX</em></div>
 <div class="kpi green"><small>Đang thực tập</small><strong id="kActive">1.123</strong><em id="kActiveRate">78,4%</em></div>
@@ -37,12 +38,29 @@
 <div class="kpi amber"><small>Đã tốt nghiệp</small><strong id="kGrad">133</strong><em>Không tính vào mẫu số TTSX</em></div>
 <div class="kpi green"><small>Tỷ lệ đang TT</small><strong id="kActivePct">78,4%</strong><em>Đang TT / Tổng HS đi TTSX</em></div>
 </div></section>
+
 <section class="section grid2"><div class="panel"><h3>Số HS đi TTSX theo doanh nghiệp</h3><p class="panel-note">Tổng HS đi TTSX = Đang thực tập + Bỏ TTSX.</p><div id="companyBars" class="bars"></div></div><div class="panel"><h3>Tỷ lệ bỏ theo doanh nghiệp</h3><p class="panel-note">Tỷ lệ bỏ = Số HS bỏ TTSX / Tổng số HS đi TTSX của chính doanh nghiệp.</p><div id="dropBars" class="bars"></div></div></section>
+
 <section class="section grid3"><div class="panel"><h3>Tình hình theo doanh nghiệp</h3><div class="table-wrap"><table><thead><tr><th>Doanh nghiệp</th><th>HS đi TTSX</th><th>Đang TT</th><th>Bỏ</th><th>Tỷ lệ bỏ</th></tr></thead><tbody id="companyTable"></tbody></table></div></div><div class="panel"><h3>Top tỉnh theo HS đi TTSX</h3><div id="provinceBars" class="bars"></div></div><div class="panel"><h3>Chất lượng dữ liệu</h3><div id="quality" class="quality"></div></div></section>
-<section id="dailySection" class="section panel" style="display:none"><div class="section-title"><div><h2>Theo dõi hằng ngày</h2><p>Chỉ tính HS đang thực tập tại 14 doanh nghiệp áp dụng chấm ngày; Sin Quyền chưa áp dụng cấu trúc 42 cột ngày.</p></div><div class="daily-head"><select id="day"></select></div></div><div class="daily-cards"><div class="daily-card"><span>Cần theo dõi</span><strong id="dExpected">0</strong></div><div class="daily-card"><span>Đã nhập</span><strong id="dEntered">0</strong></div><div class="daily-card"><span>Có điểm</span><strong id="dScore">0</strong></div><div class="daily-card"><span>Ốm (Ô)</span><strong id="dSick">0</strong></div><div class="daily-card"><span>Nghỉ phép (N)</span><strong id="dLeave">0</strong></div><div class="daily-card"><span>KLD</span><strong id="dKld">0</strong></div><div class="daily-card"><span>Chưa nhập</span><strong id="dMissing">0</strong></div></div></section>
+
+<section id="dailySection" class="section panel" style="display:none"><div class="section-title"><div><h2>Theo dõi hằng ngày</h2><p>Chỉ tính HS đang thực tập tại 14 doanh nghiệp áp dụng chấm ngày; Sin Quyền chưa áp dụng cấu trúc 42 cột ngày.</p></div><div class="daily-head"><select id="day"></select></div></div><div class="daily-cards">
+<div class="daily-card"><span>Cần theo dõi</span><strong id="dExpected">0</strong></div>
+<div class="daily-card"><span>Đã nhập</span><strong id="dEntered">0</strong></div>
+<div class="daily-card"><span>Có điểm</span><strong id="dScore">0</strong></div>
+<div class="daily-card"><span>Ốm (Ô)</span><strong id="dSick">0</strong></div>
+<div class="daily-card"><span>Nghỉ phép (N)</span><strong id="dLeave">0</strong></div>
+<div class="daily-card"><span>KLD</span><strong id="dKld">0</strong></div>
+<div class="daily-card"><span>Chưa nhập</span><strong id="dMissing">0</strong></div>
+</div></section>
+
 <section id="opsGrid" class="section grid2" style="grid-template-columns:1fr"><div class="panel"><h3>Công trường ≥3 HS bỏ theo từng doanh nghiệp</h3><p class="panel-note">Nhóm riêng theo Doanh nghiệp → Công trường/đơn vị; không gộp tên công trường giữa các công ty.</p><div id="hotspots" class="hotspots"><div class="notice">Đang đối soát dữ liệu công trường.</div></div></div><div id="coveragePanel" class="panel" style="display:none"><h3>Tỷ lệ cập nhật theo doanh nghiệp</h3><p class="panel-note">Tỷ lệ = số HS đang thực tập đã có dữ liệu trong ngày / số HS đang thực tập cần theo dõi của 14 doanh nghiệp áp dụng chấm ngày.</p><div id="coverage" class="bars"><div class="notice">Đang tải dữ liệu theo ngày.</div></div></div></section>
-<div class="footer">Nguồn web: TTSX_WEB_PUBLIC ẩn danh · Tự làm mới 5 phút/lần · Không công khai tên, SĐT, ngày sinh hoặc địa chỉ học sinh · <strong>Build V4-20260820-1445</strong></div>
+<div class="footer">Nguồn web: TTSX_WEB_PUBLIC ẩn danh · Tự làm mới 5 phút/lần · Không công khai tên, SĐT, ngày sinh hoặc địa chỉ học sinh.</div>
 </div>
-<script src="app-v4.js?v=20260820-1445"></script>
+<script src="app.js?v=20260820-1508"></script>
+<script src="core-recover.js?v=20260820-1508"></script>
+<script src="feed-guard.js?v=20260820-1208"></script>
+<script src="audit-fix.js?v=20260820-1208"></script>
+<script src="daily-scope-fix.js?v=20260820-1208"></script>
+<script src="dashboard-complete.js?v=20260820-1208"></script>
 </body>
 </html>
