@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0f4c81" />
-  <meta name="description" content="Dashboard tổng hợp vận hành nhập học hàng ngày - Trường Cao đẳng Than - Khoáng sản Việt Nam" />
+  <meta name="description" content="Dashboard tổng hợp nhập học hàng ngày, thống kê duy nhất từ DSHS NHẬP HỌC TỔNG NĂM 2026." />
   <title>Nhập học hàng ngày | CĐ TKV</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -14,50 +14,54 @@
       <div>
         <div class="eyebrow">TRƯỜNG CAO ĐẲNG THAN - KHOÁNG SẢN VIỆT NAM</div>
         <h1>NHẬP HỌC HÀNG NGÀY</h1>
-        <p class="subtitle">Cổng tổng hợp vận hành 5 phân hiệu</p>
+        <p class="subtitle">Dashboard vận hành · nguồn duy nhất: DSHS Tổng</p>
       </div>
       <div class="status-wrap">
-        <span class="status ok">● KHỚP DỮ LIỆU</span>
-        <span class="status ok">● 5/5 NGUỒN OK</span>
+        <span class="status ok" id="masterStatus">● DSHS TỔNG</span>
+        <span class="status ok" id="sourceStatus">● HỆ THỐNG NGUỒN OK</span>
       </div>
     </div>
   </header>
 
   <main class="container">
+    <div class="data-notice" id="dataNotice">
+      <strong>Nguồn thống kê duy nhất:</strong> DSHS NHẬP HỌC TỔNG NĂM 2026. TH KQ chỉ là báo cáo nội bộ, không tham gia tính số trên website.
+    </div>
+
     <section class="hero-card">
       <div>
-        <div class="label">Mốc khóa số liệu</div>
-        <div class="hero-value">29/07/2026</div>
-        <div class="muted">Từ 30/07/2026 chỉ cộng phát sinh mới từ các phân hiệu.</div>
+        <div class="label">Ngày nhập học mới nhất trong DSHS Tổng</div>
+        <div class="hero-value" data-key="latest_admission_date">18/08/2026</div>
+        <div class="muted">Mốc khóa lịch sử: <strong data-key="cutoff_date">29/07/2026</strong> · Phiên bản dữ liệu: <span data-key="data_version">20260818-2737-472-4-130</span></div>
       </div>
-      <a class="btn primary" href="https://docs.google.com/spreadsheets/d/1eaWBK0Ty_jK7RmLjLqQBLalZ6wG5zUpPpjyCflPoQ-c/edit" target="_blank" rel="noopener">Mở TH KQ</a>
+      <a class="btn primary" href="https://docs.google.com/spreadsheets/d/1QPJ0ZUYJZNB1GpUyKa04uOMkRPzUR_vwG-fizIxn7Ac/edit" target="_blank" rel="noopener">Mở DSHS Tổng</a>
     </section>
 
     <section class="section">
       <div class="section-head">
-        <h2>Tổng quan</h2>
-        <span class="updated" id="updatedText">Đang tải…</span>
+        <h2>Tổng quan từ DSHS Tổng</h2>
+        <span class="updated" id="updatedText">Đang kết nối nguồn…</span>
       </div>
       <div class="metrics">
-        <article class="metric">
-          <div class="metric-label">Tổng hệ A</div>
-          <div class="metric-value">2.118</div>
-          <div class="metric-note">Theo phân hiệu</div>
-        </article>
-        <article class="metric">
-          <div class="metric-label">Tái tuyển</div>
-          <div class="metric-value">68</div>
-          <div class="metric-note">Theo biểu doanh nghiệp</div>
-        </article>
         <article class="metric emphasized">
-          <div class="metric-label">Tổng gồm tái tuyển</div>
-          <div class="metric-value">2.186</div>
-          <div class="metric-note">Doanh nghiệp = Đơn vị tuyển</div>
+          <div class="metric-label">Tổng hồ sơ</div>
+          <div class="metric-value" data-key="total_records">2.737</div>
+          <div class="metric-note">Tất cả hồ sơ có tên trong DSHS Tổng</div>
         </article>
         <article class="metric">
-          <div class="metric-label">Phát sinh mới</div>
-          <div class="metric-value">5</div>
-          <div class="metric-note">Sau mốc 29/07</div>
+          <div class="metric-label">Còn hoạt động</div>
+          <div class="metric-value" data-key="active_records">2.265</div>
+          <div class="metric-note">Tổng hồ sơ trừ không học/bỏ học</div>
+        </article>
+        <article class="metric">
+          <div class="metric-label">Không học / bỏ học</div>
+          <div class="metric-value" data-key="inactive_records">472</div>
+          <div class="metric-note">Theo trạng thái trên DSHS Tổng</div>
+        </article>
+        <article class="metric">
+          <div class="metric-label">Phát sinh sau 29/07</div>
+          <div class="metric-value" data-key="new_since_cutoff">109</div>
+          <div class="metric-note"><span data-key="new_active_since_cutoff">93</span> hồ sơ còn hoạt động · hôm nay <span data-key="today_count">0</span></div>
         </article>
       </div>
     </section>
@@ -65,46 +69,46 @@
     <section class="section">
       <div class="section-head">
         <h2>5 phân hiệu</h2>
-        <span class="hint">Bấm để mở file nhập liệu</span>
+        <span class="hint">Tổng / còn hoạt động · bấm để mở file nhập liệu</span>
       </div>
       <div class="campuses">
         <a class="campus" href="https://docs.google.com/spreadsheets/d/1ois2Or7JfzVOMk5FfOiPB-ZwO9-NiZ3cXsQDpKPFEZ0/edit" target="_blank" rel="noopener">
           <div class="campus-top"><strong>Cẩm Phả</strong><span class="tag">PHCP</span></div>
-          <div class="campus-number">780</div>
-          <div class="campus-note">775 gốc + 5 phát sinh</div>
+          <div class="campus-number" data-key="PHCP_total">1.037</div>
+          <div class="campus-note">Còn hoạt động: <strong data-key="PHCP_active">843</strong></div>
         </a>
         <a class="campus" href="https://docs.google.com/spreadsheets/d/1ENgfi731VW6v8---mEgV0ik34f8CgJSFVM_4XI3PlvY/edit" target="_blank" rel="noopener">
           <div class="campus-top"><strong>Hoành Bồ</strong><span class="tag">PHHB</span></div>
-          <div class="campus-number">424</div>
-          <div class="campus-note">424 gốc + 0 phát sinh</div>
+          <div class="campus-number" data-key="PHHB_total">506</div>
+          <div class="campus-note">Còn hoạt động: <strong data-key="PHHB_active">431</strong></div>
         </a>
         <a class="campus" href="https://docs.google.com/spreadsheets/d/1p0dVZe2bxd_EEG1LUng2H-DQmr8ByB3ipblMopM3XrQ/edit" target="_blank" rel="noopener">
           <div class="campus-top"><strong>Hữu Nghị</strong><span class="tag">PHHN</span></div>
-          <div class="campus-number">508</div>
-          <div class="campus-note">508 gốc + 0 phát sinh</div>
+          <div class="campus-number" data-key="PHHN_total">676</div>
+          <div class="campus-note">Còn hoạt động: <strong data-key="PHHN_active">573</strong></div>
         </a>
         <a class="campus" href="https://docs.google.com/spreadsheets/d/10fM6YhhaqHkso38oTia3zmSBygKdC562Z8EskFNvUJs/edit" target="_blank" rel="noopener">
           <div class="campus-top"><strong>Việt Bắc</strong><span class="tag">PHVB</span></div>
-          <div class="campus-number">229</div>
-          <div class="campus-note">229 gốc + 0 phát sinh</div>
+          <div class="campus-number" data-key="PHVB_total">288</div>
+          <div class="campus-note">Còn hoạt động: <strong data-key="PHVB_active">238</strong></div>
         </a>
         <a class="campus" href="https://docs.google.com/spreadsheets/d/1c_PM6m8ztLoeDRNIbWhcTo1WefskEfITaCUQqGU_f8c/edit" target="_blank" rel="noopener">
           <div class="campus-top"><strong>Móng Cái</strong><span class="tag">PHMC</span></div>
-          <div class="campus-number">177</div>
-          <div class="campus-note">177 gốc + 0 phát sinh</div>
+          <div class="campus-number" data-key="PHMC_total">228</div>
+          <div class="campus-note">Còn hoạt động: <strong data-key="PHMC_active">178</strong></div>
         </a>
       </div>
     </section>
 
     <section class="section grid-2">
       <article class="panel">
-        <h2>File trung tâm</h2>
+        <h2>File vận hành</h2>
         <div class="link-list">
           <a href="https://docs.google.com/spreadsheets/d/1QPJ0ZUYJZNB1GpUyKa04uOMkRPzUR_vwG-fizIxn7Ac/edit" target="_blank" rel="noopener">
-            <span><strong>DSHS NHẬP HỌC TỔNG NĂM 2026</strong><small>Tự động hợp nhất, chỉ xem</small></span><b>↗</b>
+            <span><strong>DSHS NHẬP HỌC TỔNG NĂM 2026</strong><small>Nguồn dữ liệu duy nhất cho website · tự động hợp nhất · chỉ xem</small></span><b>↗</b>
           </a>
           <a href="https://docs.google.com/spreadsheets/d/1eaWBK0Ty_jK7RmLjLqQBLalZ6wG5zUpPpjyCflPoQ-c/edit" target="_blank" rel="noopener">
-            <span><strong>TH KQ NHẬP HỌC NĂM 2026</strong><small>Gốc chuẩn + các biểu tổng hợp</small></span><b>↗</b>
+            <span><strong>TH KQ NHẬP HỌC NĂM 2026</strong><small>Báo cáo nội bộ, không phải nguồn thống kê website</small></span><b>↗</b>
           </a>
           <a href="https://drive.google.com/drive/folders/1jfuC3CAYEk-SG2HAZqXfmZx7_9tMt0hf" target="_blank" rel="noopener">
             <span><strong>Thư mục Nhập học hàng ngày</strong><small>Google Drive dự án</small></span><b>↗</b>
@@ -113,30 +117,30 @@
       </article>
 
       <article class="panel">
-        <h2>Kiểm soát vận hành</h2>
+        <h2>Kiểm soát Master</h2>
         <ul class="checks">
-          <li><span class="dot green"></span><span>5 nguồn phân hiệu đang kết nối</span><strong>OK</strong></li>
-          <li><span class="dot green"></span><span>CCCD phát sinh bị trùng</span><strong>0</strong></li>
-          <li><span class="dot green"></span><span>Thiếu mã doanh nghiệp</span><strong>0</strong></li>
-          <li><span class="dot green"></span><span>Thiếu ngày nhập học</span><strong>0</strong></li>
-          <li><span class="dot green"></span><span>Thiếu đơn vị tuyển / phân hiệu</span><strong>0</strong></li>
+          <li><span class="dot green" id="sourceDot"></span><span>Đối chiếu 5 nguồn → Master</span><strong data-key="source_system_status">HỆ THỐNG NGUỒN OK</strong></li>
+          <li><span class="dot" id="duplicateDot"></span><span>CCCD trùng trong phát sinh mới</span><strong data-key="duplicate_new">4</strong></li>
+          <li><span class="dot" id="incompleteDot"></span><span>Hồ sơ mới thiếu trường bắt buộc</span><strong data-key="incomplete_new">130</strong></li>
+          <li><span class="dot" id="campusDot"></span><span>Hồ sơ chưa có mã phân hiệu</span><strong data-key="missing_campus_total">2</strong></li>
+          <li><span class="dot green"></span><span>Số nguồn lệch Master</span><strong data-key="source_mismatch_count">0</strong></li>
         </ul>
       </article>
     </section>
 
     <section class="section panel workflow">
-      <h2>Quy trình hằng ngày</h2>
+      <h2>Luồng tự động</h2>
       <div class="steps">
-        <div class="step"><span>1</span><div><strong>Phân hiệu nhập</strong><small>Nhập học sinh mới tại đúng file phân hiệu.</small></div></div>
+        <div class="step"><span>1</span><div><strong>5 phân hiệu nhập liệu</strong><small>Dữ liệu mới và mã phân hiệu tự động tại nguồn.</small></div></div>
         <div class="arrow">→</div>
-        <div class="step"><span>2</span><div><strong>DSHS Tổng tự nhận</strong><small>Không chỉnh sửa trực tiếp file tổng.</small></div></div>
+        <div class="step"><span>2</span><div><strong>DSHS Tổng hợp nhất</strong><small>Kiểm tra nguồn, trùng CCCD, thiếu dữ liệu và trạng thái học.</small></div></div>
         <div class="arrow">→</div>
-        <div class="step"><span>3</span><div><strong>TH KQ tự đếm</strong><small>Đối chiếu phân hiệu, doanh nghiệp, đơn vị tuyển.</small></div></div>
+        <div class="step"><span>3</span><div><strong>Website đọc WEB_DATA</strong><small>Chỉ số được tính trực tiếp trong DSHS Tổng; không đi qua TH KQ.</small></div></div>
       </div>
     </section>
 
     <section class="section panel legend">
-      <h2>Quy ước màu</h2>
+      <h2>Quy ước màu trong DSHS Tổng</h2>
       <div class="legend-items">
         <span><i class="swatch green-bg"></i> Nhập hôm nay, đủ dữ liệu</span>
         <span><i class="swatch red-bg"></i> Thiếu thông tin bắt buộc</span>
@@ -145,13 +149,13 @@
       </div>
     </section>
 
-    <p class="privacy">Website chỉ hiển thị số liệu tổng hợp và đường dẫn vận hành; không công khai thông tin cá nhân học sinh.</p>
+    <p class="privacy">Website không lấy dữ liệu cá nhân học sinh. Nguồn web chỉ chứa số tổng hợp được tính trực tiếp từ DSHS Tổng.</p>
   </main>
 
   <footer>
     <div class="container footer-inner">
       <span>Dashboard Nhập học hàng ngày</span>
-      <span>GitHub Pages · dữ liệu nguồn Google Sheets</span>
+      <span id="footerSource">Nguồn: DSHS Tổng · WEB_DATA</span>
     </div>
   </footer>
 
