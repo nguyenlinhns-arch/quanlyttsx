@@ -1,11 +1,10 @@
-# quanlyttsx
+# Dashboard quản lý TTSX học sinh TKV
 
-Dashboard quản lý Thực tập Sản xuất TKV.
+Website dashboard điều hành dữ liệu Thực tập sản xuất.
 
-- Repository: `nguyenlinhns-arch/quanlyttsx`
-- GitHub Pages: `https://nguyenlinhns-arch.github.io/quanlyttsx/`
-- Tên miền miễn phí dự kiến: `https://quanlyttsx.is-cool.dev/`
-- DNS đích dự kiến: CNAME `quanlyttsx.is-cool.dev` → `nguyenlinhns-arch.github.io`
-- Nguồn web dùng feed ẩn danh từ Google Sheets `BC TTSX`.
-- Không công khai họ tên, số điện thoại, ngày sinh hoặc địa chỉ học sinh.
-- Pages deployment triggered after enabling GitHub Actions on 2026-08-19.
+- Nguồn web: `TTSX_WEB_PUBLIC`
+- Dữ liệu chi tiết được ẩn danh trước khi xuất web.
+- Dashboard đối soát đủ 15 doanh nghiệp trước khi hiển thị dữ liệu live.
+- Feed lõi A:G được tải độc lập; dữ liệu 42 ngày được tải theo khối để tránh GViz cắt dòng.
+
+Deployment refresh: 2026-08-20 14:23 +07:00
