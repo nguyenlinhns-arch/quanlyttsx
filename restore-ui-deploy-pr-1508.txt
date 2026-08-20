@@ -1,0 +1,1 @@
+Server-side merge trigger for restored UI + _WEB_CORE recovery.
