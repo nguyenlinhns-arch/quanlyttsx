@@ -1,0 +1,1 @@
+Server-side merge trigger: restored original dashboard UI + stable core + daily chunk recovery.
