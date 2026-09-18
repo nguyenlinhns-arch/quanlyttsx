@@ -102,6 +102,123 @@ Q('c15','exchange','Na₂CO₃ + 2HCl tạo khí:',['H₂','CO₂','O₂','Cl₂
 
 
 
+/* Ngân hàng mở rộng để bài kiểm tra đủ độ dài đánh giá. */
+function addQuestions(subject, items){ BANK[subject].push(...items); }
+
+addQuestions('math',[
+Q('m16','sqrt','Điều kiện để √(x − 1) có nghĩa là:',['x > 1','x ≥ 1','x ≤ 1','x ≠ 1'],1,'Cần x − 1 ≥ 0 nên x ≥ 1.'),
+Q('m17','sqrt','Điều kiện để √(x − 4) có nghĩa là:',['x ≥ 4','x > 4','x ≤ 4','x ≠ 4'],0,'Cần x − 4 ≥ 0 nên x ≥ 4.'),
+Q('m18','sqrt','Giá trị của √64 là:',['±8','8','−8','32'],1,'Căn bậc hai số học của 64 là 8.'),
+Q('m19','sqrt','Giá trị của √81 là:',['9','−9','±9','81'],0,'Căn bậc hai số học luôn không âm.'),
+Q('m20','sqrt','Với a < 0, √(a²) bằng:',['a','−a','a²','0'],1,'√(a²)=|a|; nếu a<0 thì |a|=−a.'),
+Q('m21','radical','Rút gọn √48 được:',['4√3','3√4','2√12','8√3'],0,'√48=√(16×3)=4√3.'),
+Q('m22','radical','Rút gọn √108 được:',['3√12','6√3','9√3','18√3'],1,'√108=√(36×3)=6√3.'),
+Q('m23','radical','Rút gọn √147 được:',['7√3','3√7','21√7','49√3'],0,'√147=√(49×3)=7√3.'),
+Q('m24','radical','Rút gọn √32 được:',['2√8','4√2','8√2','16√2'],1,'√32=√(16×2)=4√2.'),
+Q('m25','radical','Rút gọn √200 được:',['10√2','20√2','5√8','100√2'],0,'√200=√(100×2)=10√2.'),
+Q('m26','system','Nghiệm của hệ x+y=7; x−y=3 là:',['(5;2)','(2;5)','(4;3)','(3;4)'],0,'Cộng hai phương trình: 2x=10, x=5, y=2.'),
+Q('m27','system','Nghiệm của hệ x+y=9; x−y=1 là:',['(4;5)','(5;4)','(6;3)','(3;6)'],1,'Cộng hai phương trình: 2x=10, x=5, y=4.'),
+Q('m28','system','Nghiệm của hệ x+y=10; x−y=4 là:',['(6;4)','(7;3)','(5;5)','(8;2)'],1,'Cộng hai phương trình: 2x=14, x=7, y=3.'),
+Q('m29','system','Hệ x+y=3; 2x+2y=7 có:',['Một nghiệm','Vô số nghiệm','Vô nghiệm','Hai nghiệm'],2,'Hai phương trình mâu thuẫn nên hệ vô nghiệm.'),
+Q('m30','system','Nếu 3x+y=11 và x−y=1 thì x bằng:',['2','3','4','5'],1,'Cộng hai phương trình: 4x=12 nên x=3.'),
+Q('m31','triangle','Tam giác vuông có hai cạnh góc vuông 5 và 12. Cạnh huyền là:',['13','15','17','10'],0,'Theo Pitago: √(25+144)=13.'),
+Q('m32','triangle','Tam giác vuông có hai cạnh góc vuông 8 và 15. Cạnh huyền là:',['16','17','18','20'],1,'Theo Pitago: √(64+225)=17.'),
+Q('m33','triangle','Tam giác vuông có hai cạnh góc vuông 7 và 24. Cạnh huyền là:',['23','24','25','26'],2,'Theo Pitago: √(49+576)=25.'),
+Q('m34','triangle','Tam giác vuông có cạnh huyền 10, cạnh đối góc A là 6. sin A bằng:',['3/5','4/5','5/3','2/5'],0,'sin A=6/10=3/5.'),
+Q('m35','triangle','Tam giác vuông có cạnh huyền 13, cạnh kề góc A là 12. cos A bằng:',['5/13','12/13','13/12','12/5'],1,'cos A=12/13.'),
+Q('m36','circle','Đường tròn có đường kính 14 cm thì bán kính bằng:',['28 cm','14 cm','7 cm','3,5 cm'],2,'R=d/2=7 cm.'),
+Q('m37','circle','Điểm M cách tâm O đúng bằng R thì M nằm:',['trong đường tròn','ngoài đường tròn','trên đường tròn','không xác định'],2,'OM=R nên M thuộc đường tròn.'),
+Q('m38','circle','Điểm N có ON>R thì N nằm:',['trong đường tròn','trên đường tròn','ngoài đường tròn','tại tâm'],2,'ON>R nên N nằm ngoài đường tròn.'),
+Q('m39','circle','Tiếp tuyến của đường tròn tại A vuông góc với:',['dây bất kỳ','bán kính OA','đường kính bất kỳ','cung nhỏ'],1,'Tiếp tuyến tại A vuông góc với OA.'),
+Q('m40','circle','Một đường tròn có R=6 cm thì đường kính bằng:',['3 cm','6 cm','12 cm','36 cm'],2,'d=2R=12 cm.')
+]);
+
+addQuestions('english',[
+Q('e16','tenses','My brother ___ football every Sunday.',['play','plays','played','is play'],1,'Present simple with a singular subject: plays.'),
+Q('e17','tenses','They ___ dinner when I called.',['have','had','were having','are having'],2,'Past continuous describes an action in progress in the past.'),
+Q('e18','tenses','We ___ this film twice.',['see','saw','have seen','are seeing'],2,'Experience up to now uses present perfect.'),
+Q('e19','tenses','Look! The children ___.',['run','ran','are running','have run'],2,'Look! signals present continuous.'),
+Q('e20','tenses','I think it ___ tomorrow.',['rains','rained','will rain','is rain'],2,'Prediction: will + verb.'),
+Q('e21','passive','They clean the room every day. The room ___ every day.',['cleans','is cleaned','was cleaned','has clean'],1,'Present simple passive: is/are + V3.'),
+Q('e22','passive','Someone stole my bike yesterday. My bike ___ yesterday.',['is stolen','was stolen','stole','has stolen'],1,'Past simple passive: was/were + V3.'),
+Q('e23','passive','They will finish the road soon. The road ___ soon.',['will finish','will be finished','is finishing','was finished'],1,'Future passive: will be + V3.'),
+Q('e24','passive','You should protect the environment. The environment should ___.',['protect','be protected','protected','be protect'],1,'Modal passive: should be + V3.'),
+Q('e25','passive','People speak English in many countries. English ___ in many countries.',['speaks','is spoken','was spoke','spoken'],1,'Present simple passive: is spoken.'),
+Q('e26','relative','The woman ___ lives next door is a doctor.',['which','who','where','when'],1,'Who refers to a person.'),
+Q('e27','relative','This is the house ___ I was born.',['who','which','where','whose'],2,'Where refers to a place.'),
+Q('e28','relative','The computer ___ I bought is very fast.',['who','which','where','whose'],1,'Which refers to a thing.'),
+Q('e29','relative','The student ___ father is a teacher won the prize.',['who','whose','which','where'],1,'Whose shows possession.'),
+Q('e30','relative','Sunday is the day ___ we usually visit our grandparents.',['where','who','when','which'],2,'When refers to time.'),
+Q('e31','conditional','If you study hard, you ___ the exam.',['pass','passed','will pass','would pass'],2,'First conditional.'),
+Q('e32','conditional','If I were you, I ___ that job.',['take','will take','would take','took'],2,'Second conditional: would + verb.'),
+Q('e33','conditional','If water reaches 100°C, it ___.',['boils','will boil','would boil','boiled'],0,'Zero conditional for scientific facts.'),
+Q('e34','conditional','If she ___ earlier, she would catch the bus.',['leaves','left','will leave','is leaving'],1,'Second conditional uses past simple after if.'),
+Q('e35','conditional','If it does not rain, we ___ a picnic.',['have','had','will have','would have'],2,'First conditional.'),
+Q('e36','vocab','The test was quite ___.',['difficulty','difficult','difficultly','difficulties'],1,'An adjective follows was.'),
+Q('e37','vocab','She sings very ___.',['beautiful','beauty','beautifully','beautify'],2,'An adverb modifies sings.'),
+Q('e38','vocab','Air ___ is a serious problem.',['pollute','polluted','pollution','polluting'],2,'A noun is needed after Air.'),
+Q('e39','vocab','He gave a very ___ answer.',['help','helpful','helpfully','helped'],1,'An adjective modifies answer.'),
+Q('e40','vocab','We need to use energy more ___.',['efficient','efficiency','efficiently','efficiencies'],2,'An adverb modifies use.')
+]);
+
+addQuestions('physics',[
+Q('p16','ohm','Điện trở 5 Ω đặt vào 10 V. Dòng điện là:',['0,5 A','2 A','5 A','50 A'],1,'I=U/R=2 A.'),
+Q('p17','ohm','Dòng điện 2 A qua điện trở 6 Ω. Hiệu điện thế là:',['3 V','8 V','12 V','24 V'],2,'U=IR=12 V.'),
+Q('p18','ohm','U=9 V, I=0,3 A. Điện trở là:',['3 Ω','27 Ω','30 Ω','90 Ω'],2,'R=U/I=30 Ω.'),
+Q('p19','ohm','Giữ R không đổi, tăng U gấp đôi thì I:',['giảm nửa','tăng gấp đôi','không đổi','tăng gấp bốn'],1,'I tỉ lệ thuận U.'),
+Q('p20','ohm','Đơn vị của cường độ dòng điện là:',['V','A','Ω','W'],1,'Cường độ dòng điện đo bằng ampe.'),
+Q('p21','circuit','Hai điện trở 4 Ω và 6 Ω mắc nối tiếp. R tương đương là:',['2,4 Ω','10 Ω','24 Ω','5 Ω'],1,'Rtd=R1+R2=10 Ω.'),
+Q('p22','circuit','Hai điện trở 4 Ω và 4 Ω mắc song song. R tương đương là:',['8 Ω','4 Ω','2 Ω','1 Ω'],2,'Rtd=R/2=2 Ω.'),
+Q('p23','circuit','Trong mạch song song, hiệu điện thế hai đầu các nhánh:',['bằng nhau','khác nhau','bằng 0','tỉ lệ điện trở'],0,'Các nhánh song song có cùng hiệu điện thế.'),
+Q('p24','circuit','Trong mạch nối tiếp, điện trở tương đương:',['nhỏ hơn từng điện trở','bằng tổng các điện trở','bằng tích','bằng điện trở nhỏ nhất'],1,'Rtd bằng tổng các điện trở.'),
+Q('p25','circuit','Hai điện trở 12 Ω và 6 Ω mắc song song có R tương đương:',['18 Ω','6 Ω','4 Ω','2 Ω'],2,'1/R=1/12+1/6=1/4 nên R=4 Ω.'),
+Q('p26','power','Thiết bị dùng 12 V, I=2 A có công suất:',['6 W','14 W','24 W','36 W'],2,'P=UI=24 W.'),
+Q('p27','power','Bóng đèn ghi 60 W. Đại lượng 60 W là:',['điện năng','công suất','điện trở','hiệu điện thế'],1,'W là đơn vị công suất.'),
+Q('p28','power','P=100 W, U=200 V. Cường độ dòng điện là:',['0,5 A','2 A','20 A','20000 A'],0,'I=P/U=0,5 A.'),
+Q('p29','power','Công thức tính công suất điện là:',['P=I²R','P=Rt','P=Q/t²','P=U/R'],0,'Từ P=UI và U=IR suy ra P=I²R.'),
+Q('p30','power','Giữ U không đổi, I tăng gấp đôi thì P:',['giảm nửa','không đổi','tăng gấp đôi','tăng gấp bốn'],2,'P=UI.'),
+Q('p31','energy','Thiết bị 500 W dùng 2 giờ tiêu thụ:',['0,5 kWh','1 kWh','2 kWh','1000 kWh'],1,'0,5 kW×2 h=1 kWh.'),
+Q('p32','energy','Bóng đèn 50 W dùng 10 giờ tiêu thụ:',['0,05 kWh','0,5 kWh','5 kWh','500 kWh'],1,'0,05×10=0,5 kWh.'),
+Q('p33','energy','Điện năng tiêu thụ gia đình thường tính bằng:',['A','V','kWh','Ω'],2,'Công tơ điện dùng kWh.'),
+Q('p34','energy','1 kWh tương ứng thiết bị 1 kW hoạt động trong:',['1 phút','1 giờ','10 giờ','1000 giờ'],1,'1 kWh=1 kW×1 h.'),
+Q('p35','energy','Máy 2 kW chạy 30 phút tiêu thụ:',['0,5 kWh','1 kWh','2 kWh','4 kWh'],1,'30 phút=0,5 h; A=1 kWh.'),
+Q('p36','joule','I=2 A, R=5 Ω, t=10 s. Nhiệt lượng tỏa ra là:',['50 J','100 J','200 J','400 J'],2,'Q=I²Rt=200 J.'),
+Q('p37','joule','Giữ I,R không đổi, thời gian tăng gấp 3 thì Q:',['giảm 3 lần','tăng 3 lần','tăng 9 lần','không đổi'],1,'Q tỉ lệ thuận t.'),
+Q('p38','joule','Giữ I,t không đổi, R tăng gấp đôi thì Q:',['giảm nửa','tăng gấp đôi','tăng gấp bốn','không đổi'],1,'Q tỉ lệ thuận R.'),
+Q('p39','joule','Thiết bị khai thác chủ yếu tác dụng nhiệt của dòng điện là:',['quạt điện','bếp điện','chuông điện','nam châm điện'],1,'Bếp điện biến điện năng thành nhiệt năng.'),
+Q('p40','joule','Cầu chì bảo vệ mạch chủ yếu nhờ tác dụng:',['từ','hóa học','nhiệt','quang'],2,'Dòng điện lớn làm dây chì nóng chảy.')
+]);
+
+addQuestions('chemistry',[
+Q('c16','oxide','Chất nào là oxit axit?',['CaO','Na₂O','SO₃','MgO'],2,'SO₃ là oxit axit.'),
+Q('c17','oxide','CO₂ tác dụng với Ca(OH)₂ tạo kết tủa:',['CaO','CaCO₃','CaCl₂','CaSO₄'],1,'Tạo CaCO₃ kết tủa.'),
+Q('c18','oxide','MgO tác dụng với HCl tạo:',['MgCl₂ và H₂O','Mg và Cl₂','Mg(OH)₂','H₂ và MgCl₂'],0,'MgO + 2HCl → MgCl₂ + H₂O.'),
+Q('c19','oxide','Oxit bazơ thường tác dụng với:',['bazơ','axit','muối bất kỳ','kim loại'],1,'Oxit bazơ phản ứng với axit.'),
+Q('c20','oxide','Oxit axit thường tác dụng với dung dịch:',['axit','bazơ','NaCl','Cu'],1,'Oxit axit phản ứng với bazơ.'),
+Q('c21','acid','H₂SO₄ là:',['bazơ','muối','axit','oxit'],2,'H₂SO₄ là axit sulfuric.'),
+Q('c22','acid','Axit tác dụng với kim loại đứng trước H thường tạo:',['muối và H₂','bazơ và O₂','oxit và nước','chỉ muối'],0,'Kim loại + axit thường tạo muối và H₂.'),
+Q('c23','acid','Dung dịch nào làm quỳ tím hóa đỏ?',['NaOH','HCl','NaCl','KNO₃'],1,'HCl là axit.'),
+Q('c24','acid','2HCl + Mg tạo sản phẩm:',['MgCl₂ + H₂','MgO + H₂','Mg(OH)₂ + Cl₂','Mg + HCl'],0,'Mg + 2HCl → MgCl₂ + H₂.'),
+Q('c25','acid','Phản ứng axit + bazơ gọi là:',['phân hủy','hóa hợp','trung hòa','thế'],2,'Axit + bazơ → muối + nước.'),
+Q('c26','base','Bazơ tan còn gọi là:',['kiềm','axit','muối','oxit'],0,'Bazơ tan được gọi là kiềm.'),
+Q('c27','base','Chất nào là bazơ không tan?',['NaOH','KOH','Cu(OH)₂','Ba(OH)₂'],2,'Cu(OH)₂ không tan.'),
+Q('c28','base','NaOH tác dụng với HCl tạo:',['NaCl + H₂O','Na₂O + Cl₂','Na + H₂O','NaClO'],0,'Phản ứng trung hòa.'),
+Q('c29','base','Dung dịch NaOH làm phenolphthalein:',['không màu','màu hồng','màu đỏ gạch','màu xanh'],1,'Phenolphthalein hóa hồng trong bazơ.'),
+Q('c30','base','Cu(OH)₂ có màu:',['trắng','xanh lam','đen','vàng'],1,'Cu(OH)₂ là kết tủa xanh lam.'),
+Q('c31','salt','NaCl thuộc loại:',['axit','bazơ','muối','oxit'],2,'NaCl là muối.'),
+Q('c32','salt','BaCl₂ tác dụng Na₂SO₄ tạo kết tủa màu:',['trắng','xanh','đen','đỏ'],0,'BaSO₄ là kết tủa trắng.'),
+Q('c33','salt','Muối cacbonat gặp axit giải phóng khí:',['H₂','O₂','CO₂','Cl₂'],2,'Khí CO₂ được giải phóng.'),
+Q('c34','salt','AgNO₃ dùng nhận biết ion Cl⁻ vì tạo:',['AgCl kết tủa','Ag₂O khí','Cl₂ kết tủa','NaNO₃ kết tủa'],0,'AgCl là kết tủa.'),
+Q('c35','salt','Na₂SO₄ tác dụng BaCl₂ thuộc loại phản ứng:',['thế','phân hủy','trao đổi','hóa hợp'],2,'Hai hợp chất trao đổi thành phần.'),
+Q('c36','exchange','Phản ứng trao đổi trong dung dịch thường xảy ra khi tạo:',['kết tủa, khí hoặc nước','hai chất tan','kim loại mạnh','chỉ oxit'],0,'Sản phẩm phải tách khỏi dung dịch hoặc điện li yếu.'),
+Q('c37','exchange','NaOH + HCl xảy ra vì tạo:',['H₂','H₂O','Cl₂','O₂'],1,'Tạo nước.'),
+Q('c38','exchange','Na₂CO₃ + HCl xảy ra vì tạo khí:',['CO₂','H₂','O₂','N₂'],0,'Tạo CO₂.'),
+Q('c39','exchange','AgNO₃ + NaCl xảy ra vì tạo:',['AgCl kết tủa','NaNO₃ kết tủa','Cl₂ khí','Ag kim loại'],0,'Tạo AgCl không tan.'),
+Q('c40','exchange','BaCl₂ + Na₂SO₄ xảy ra vì tạo:',['BaSO₄ kết tủa','NaCl kết tủa','SO₂ khí','Ba kim loại'],0,'Tạo BaSO₄ không tan.')
+]);
+
+const TARGETS={month:15,midterm:25,final:35};
+
 const KEY='kenSimple.history.v2';
 const MODES={
   month:{name:'Tháng',full:'Ôn tháng'},
@@ -112,7 +229,10 @@ const MONTH_SCOPE={
   math:['sqrt','radical'], english:['tenses','vocab'], physics:['ohm','circuit'], chemistry:['oxide','acid']
 };
 const MID_SCOPE={
-  math:['sqrt','radical','system','triangle'], english:['tenses','passive','vocab'], physics:['ohm','circuit','power'], chemistry:['oxide','acid','base']
+  math:['sqrt','radical','system','triangle'],
+  english:['tenses','passive','relative','vocab'],
+  physics:['ohm','circuit','power','energy'],
+  chemistry:['oxide','acid','base','salt']
 };
 
 let mode='month',group='entrance',subject='math',state=null,timer=null;
@@ -129,6 +249,21 @@ function scope(s,m){
   return SUBJECTS[s].topics.map(x=>x[0])
 }
 function qs(){const sc=scope(subject,mode);return (BANK[subject]||[]).filter(q=>sc.includes(q.topic))}
+function balancedQuestions(){
+  const pool=qs(), topics=scope(subject,mode), target=Math.min(TARGETS[mode]||15,pool.length);
+  const buckets=topics.map(t=>shuffle(pool.filter(q=>q.topic===t)));
+  const picked=[]; let round=0;
+  while(picked.length<target){
+    let added=false;
+    for(const b of buckets){
+      if(picked.length>=target)break;
+      if(b[round]){picked.push(b[round]);added=true;}
+    }
+    if(!added)break;
+    round++;
+  }
+  return picked;
+}
 function latest(s){return hist().find(x=>x.subject===s)||null}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function grade(p){return p>=85?'Vững':p>=70?'Khá':p>=55?'Đạt':'Cần học lại'}
@@ -158,18 +293,18 @@ function renderSubjects(){
 }
 
 function renderReady(){
-  const ready=isReady(subject),c=qs(),names=scope(subject,mode).map(t=>topicName(subject,t)).join(' • ');
+  const ready=isReady(subject),c=qs(),target=Math.min(TARGETS[mode]||15,c.length),names=scope(subject,mode).map(t=>topicName(subject,t)).join(' • ');
   $('ready').classList.remove('hidden');$('quiz').classList.add('hidden');$('result').classList.add('hidden');
   if(!ready){
     $('ready').innerHTML='<div class="ready-top"><div><h2>'+SUBJECTS[subject].name+'</h2><p>Đã có thư mục và nguồn đề Quảng Ninh trong kho dữ liệu.</p></div><button class="btn secondary" disabled>Đang chuẩn hóa</button></div><div class="topics">'+esc(names)+'</div><div class="source-note">Chỉ mở Quiz khi câu hỏi đã được chuẩn hóa từ đề chính thức/đề trường có nguồn rõ ràng.</div>';
     return;
   }
-  $('ready').innerHTML='<div class="ready-top"><div><h2>'+MODES[mode].full+' • '+SUBJECTS[subject].name+'</h2><p>'+c.length+' câu kiểm tra</p></div><button id="start" class="btn primary">Bắt đầu</button></div><div class="topics">'+esc(names)+'</div>';
+  $('ready').innerHTML='<div class="ready-top"><div><h2>'+MODES[mode].full+' • '+SUBJECTS[subject].name+'</h2><p>'+target+' câu kiểm tra • cân bằng theo chuyên đề</p></div><button id="start" class="btn primary">Bắt đầu</button></div><div class="topics">'+esc(names)+'</div>';
   $('start').onclick=startQuiz;
 }
 
 function startQuiz(){
-  const questions=shuffle(qs());
+  const questions=balancedQuestions();
   if(!questions.length)return;
   clearInterval(timer);
   state={questions,answers:Array(questions.length).fill(null),index:0,started:Date.now()};
@@ -191,8 +326,8 @@ function submit(){
   let correct=0;const stats={},wrong=[];
   state.questions.forEach((q,i)=>{const ok=state.answers[i]===q.answer;if(ok)correct++;else wrong.push({q,chosen:state.answers[i],num:i+1});if(!stats[q.topic])stats[q.topic]={correct:0,total:0};stats[q.topic].total++;if(ok)stats[q.topic].correct++});
   const percent=Math.round(correct/state.questions.length*100);
-  const strong=Object.keys(stats).filter(t=>stats[t].correct/stats[t].total>=.75);
-  const weak=Object.keys(stats).filter(t=>stats[t].correct/stats[t].total<.6);
+  const strong=Object.keys(stats).filter(t=>stats[t].total>=2&&stats[t].correct/stats[t].total>=.75);
+  const weak=Object.keys(stats).filter(t=>stats[t].total>=2&&stats[t].correct/stats[t].total<.6);
   const r={date:new Date().toISOString(),mode,subject,score:correct,total:state.questions.length,percent,level:grade(percent),strongTopics:strong,weakTopics:weak};
   const h=hist();h.unshift(r);save(h.slice(0,100));
   $('quiz').classList.add('hidden');$('result').classList.remove('hidden');
