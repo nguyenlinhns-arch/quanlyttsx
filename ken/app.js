@@ -1,8 +1,5 @@
 'use strict';
 
-const STORAGE_PLAN='kenWeekly.plan.v3';
-const STORAGE_HISTORY='kenWeekly.history.v3';
-
 const SUBJECTS={
   math:{name:'Toán',icon:'∑',topics:[
     ['sqrt','Căn bậc hai & căn thức'],['radical','Biến đổi căn thức'],['system','Hệ phương trình'],['triangle','Hệ thức lượng tam giác vuông'],['circle','Đường tròn']
@@ -93,119 +90,253 @@ Q('c15','exchange','Na₂CO₃ + 2HCl tạo khí:',['H₂','CO₂','O₂','Cl₂
 ]
 };
 
+
+
+const STORAGE_HISTORY='kenWeekly.history.v3';
+
+const MODES={
+  month:{name:'Ôn tháng',short:'Tháng',questions:10,minutes:25,desc:'Kiểm tra phần vừa học trong tháng và lặp lại lỗi cũ.',tone:'blue'},
+  midterm:{name:'Ôn giữa kỳ',short:'Giữa kỳ',questions:12,minutes:40,desc:'Cộng dồn kiến thức từ đầu học kỳ, tăng câu vận dụng.',tone:'warn'},
+  final:{name:'Ôn cuối kỳ',short:'Cuối kỳ',questions:15,minutes:55,desc:'Bao phủ toàn học kỳ, ưu tiên chuyên đề từng mất điểm.',tone:'good'}
+};
+
+const STUDY_WEEK=[
+  {day:1,label:'Thứ 2',items:['Ngày đệm','Chữa lỗi 15–20 phút']},
+  {day:2,label:'Thứ 3',items:['Tiếng Anh 16:15–18:15','Ôn nhanh 10 phút sau buổi học']},
+  {day:3,label:'Thứ 4',items:['Hóa 16:30–18:30','Ôn công thức/phản ứng 15 phút']},
+  {day:4,label:'Thứ 5',items:['Tiếng Anh 16:15–18:15','Quiz ngắn 8–10 câu']},
+  {day:5,label:'Thứ 6',items:['Ngày đệm','Chữa phần yếu nhất tuần']},
+  {day:6,label:'Thứ 7',items:['Toán 09:00–11:00','Cuối tháng: làm bài Toán tháng']},
+  {day:0,label:'Chủ nhật',items:['Lý 07:00–09:00','Toán 09:00–11:00','Tổng kết tuần 15 phút']}
+];
+
+const MONTH_SCOPE={
+  9:{math:['sqrt','radical'],english:['tenses','vocab'],physics:['ohm','circuit'],chemistry:['oxide','acid']},
+  10:{math:['sqrt','radical','system'],english:['tenses','passive','vocab'],physics:['ohm','circuit','power'],chemistry:['oxide','acid','base']},
+  11:{math:['radical','system','triangle'],english:['passive','relative','vocab'],physics:['circuit','power','energy'],chemistry:['acid','base','salt']},
+  12:{math:['system','triangle','circle'],english:['relative','conditional','vocab'],physics:['power','energy','joule'],chemistry:['base','salt','exchange']},
+  1:{math:['sqrt','radical','system','triangle','circle'],english:['tenses','passive','relative','conditional','vocab'],physics:['ohm','circuit','power','energy','joule'],chemistry:['oxide','acid','base','salt','exchange']}
+};
+
+const TIMELINE=[
+  {label:'Tháng 9',range:'07–30/09',kind:'month',text:'Khởi động HKI • củng cố nền tảng • lấy mốc năng lực ban đầu.'},
+  {label:'Tháng 10',range:'01–18/10',kind:'month',text:'Ôn tháng 10 • tăng dần vận dụng.'},
+  {label:'Giữa kỳ I',range:'19/10–08/11',kind:'midterm',text:'Cửa sổ ôn giữa kỳ I • cộng dồn tháng 9–10.'},
+  {label:'Tháng 11',range:'09–30/11',kind:'month',text:'Chữa lỗi giữa kỳ • học tiếp kiến thức mới.'},
+  {label:'Tháng 12',range:'01–20/12',kind:'month',text:'Ôn tháng 12 • chuẩn bị tổng hợp HKI.'},
+  {label:'Cuối kỳ I',range:'21/12–10/01',kind:'final',text:'Ôn toàn HKI • kiểm tra đủ 4 môn.'},
+  {label:'Giữa kỳ II',range:'01–21/03',kind:'midterm',text:'Cộng dồn nội dung HKII đã học; ưu tiên lỗi lặp.'},
+  {label:'Cuối kỳ II',range:'19/04–09/05',kind:'final',text:'Hoàn tất kiến thức năm học trước giai đoạn nước rút.'},
+  {label:'Vào 10',range:'10–19/05',kind:'entrance',text:'Chuyển sang đề thi thật, ưu tiên Toán và Tiếng Anh.'}
+];
+
 let selectedSubject='math';
+let selectedMode='month';
 let activeQuiz=null;
 let timer=null;
-const $=function(id){return document.getElementById(id);};
+const $=id=>document.getElementById(id);
 
 function read(key,def){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(def));}catch(e){return def;}}
 function write(key,val){localStorage.setItem(key,JSON.stringify(val));}
-function plans(){return read(STORAGE_PLAN,{});}
 function history(){return read(STORAGE_HISTORY,[]);}
-function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function topicName(subject,key){var t=SUBJECTS[subject].topics.find(function(x){return x[0]===key;});return t?t[1]:key;}
-function weekNow(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+3-((d.getDay()+6)%7));var w1=new Date(d.getFullYear(),0,4);var w=1+Math.round(((d-w1)/86400000-3+((w1.getDay()+6)%7))/7);return d.getFullYear()+'-W'+String(w).padStart(2,'0');}
-function weekLabel(v){if(!v)return'';var p=v.split('-W');return'Tuần '+Number(p[1])+' • '+p[0];}
-function currentWeek(){return $('weekInput').value;}
-function getPlan(subject){var p=plans();return(p[currentWeek()]&&p[currentWeek()][subject])||{topics:[],note:''};}
-function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x;}return a;}
-function fmt(sec){var m=Math.floor(sec/60),s=sec%60;return m?m+' phút '+String(s).padStart(2,'0')+' giây':s+' giây';}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function topicName(subject,key){const t=SUBJECTS[subject].topics.find(x=>x[0]===key);return t?t[1]:key;}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function fmt(sec){const m=Math.floor(sec/60),s=sec%60;return m?m+' phút '+String(s).padStart(2,'0')+' giây':s+' giây';}
 function level(p){return p>=90?'Vững':p>=75?'Khá':p>=60?'Đạt':'Cần củng cố';}
-function toast(msg){var x=document.createElement('div');x.className='toast';x.textContent=msg;document.body.appendChild(x);setTimeout(function(){x.remove();},2200);}
+function toast(msg){const x=document.createElement('div');x.className='toast';x.textContent=msg;document.body.appendChild(x);setTimeout(()=>x.remove(),2200);}
+function today(){const d=new Date();return{d,month:d.getMonth()+1,day:d.getDay(),date:d.getDate()};}
+function term(){const m=today().month;return (m>=9||m===1)?1:2;}
 
-function renderPlan(){
-  $('weekText').textContent=weekLabel(currentWeek());
-  var out='';
-  Object.keys(SUBJECTS).forEach(function(k){
-    var s=SUBJECTS[k],p=getPlan(k);
-    out+='<article class="plan-card" data-subject="'+k+'"><div class="plan-title"><div><h3>'+s.name+'</h3><div class="muted">'+p.topics.length+' chủ đề đã chọn</div></div><div class="subject-icon">'+s.icon+'</div></div><div class="topic-list">';
-    s.topics.forEach(function(t){out+='<label class="topic-chip"><input type="checkbox" data-topic="'+t[0]+'" '+(p.topics.indexOf(t[0])>=0?'checked':'')+'><span>'+escapeHtml(t[1])+'</span></label>';});
-    out+='</div><div class="plan-note"><label>Bài cụ thể / ghi chú tiến độ</label><textarea data-note placeholder="Ví dụ: bài đã học, dạng cô vừa chữa...">'+escapeHtml(p.note||'')+'</textarea></div></article>';
+function currentAutoMode(){
+  const {month,date}=today();
+  if(month===10&&date>=19)return'midterm';
+  if(month===11&&date<=8)return'midterm';
+  if(month===12&&date>=21)return'final';
+  if(month===1&&date<=10)return'final';
+  if(month===3&&date<=21)return'midterm';
+  if(month===4&&date>=19)return'final';
+  if(month===5&&date<=9)return'final';
+  return'month';
+}
+
+function currentMonthLabel(){
+  const m=today().month;
+  return m===1?'Tháng 1 • cuối HKI':'Tháng '+m;
+}
+
+function weakTopicsFor(subject){
+  const scores={};
+  history().filter(x=>x.subject===subject).slice(0,8).forEach(r=>{
+    Object.entries(r.topicStats||{}).forEach(([t,v])=>{
+      if(!scores[t])scores[t]={c:0,n:0};
+      scores[t].c+=v.correct;scores[t].n+=v.total;
+    });
   });
-  $('planGrid').innerHTML=out;
-  document.querySelectorAll('.plan-card input').forEach(function(el){el.addEventListener('change',function(){var c=el.closest('.plan-card');c.querySelector('.muted').textContent=c.querySelectorAll('input:checked').length+' chủ đề đã chọn';});});
+  return Object.keys(scores).filter(t=>scores[t].n&&scores[t].c/scores[t].n<.7);
 }
-function savePlan(){
-  var all=plans(),w=currentWeek();if(!all[w])all[w]={};
-  document.querySelectorAll('.plan-card').forEach(function(card){
-    var ts=Array.from(card.querySelectorAll('input:checked')).map(function(x){return x.dataset.topic;});
-    all[w][card.dataset.subject]={topics:ts,note:card.querySelector('[data-note]').value.trim(),updatedAt:new Date().toISOString()};
-  });
-  write(STORAGE_PLAN,all);$('savePlanStatus').textContent='Đã lưu '+weekLabel(w).toLowerCase()+'.';renderQuizSubjects();renderQuizSetup();setTimeout(function(){$('savePlanStatus').textContent='';},2000);
+
+function monthTopics(subject){
+  const m=today().month;
+  const map=MONTH_SCOPE[m]||null;
+  return map?map[subject]:SUBJECTS[subject].topics.map(x=>x[0]);
 }
-function starter(){
-  document.querySelectorAll('.plan-card').forEach(function(card){var list=STARTER[card.dataset.subject];card.querySelectorAll('input').forEach(function(cb){cb.checked=list.indexOf(cb.dataset.topic)>=0;});card.querySelector('.muted').textContent=list.length+' chủ đề đã chọn';});
-  toast('Đã nạp gợi ý đầu năm. Hãy chỉnh lại theo đúng bài Ken đã học.');
+
+function scopeFor(subject,mode){
+  if(mode==='month'){
+    const base=monthTopics(subject);
+    return Array.from(new Set([...base,...weakTopicsFor(subject)]));
+  }
+  if(mode==='midterm'){
+    const t=term();
+    if(t===1){
+      const months=[9,10,11].filter(m=>MONTH_SCOPE[m]);
+      return Array.from(new Set(months.flatMap(m=>MONTH_SCOPE[m][subject]).concat(weakTopicsFor(subject))));
+    }
+    return SUBJECTS[subject].topics.map(x=>x[0]);
+  }
+  return SUBJECTS[subject].topics.map(x=>x[0]);
 }
+
+function candidates(subject=selectedSubject,mode=selectedMode){
+  const scope=scopeFor(subject,mode);
+  return BANK[subject].filter(q=>scope.includes(q.topic));
+}
+
+function renderToday(){
+  const t=today(),study=STUDY_WEEK.find(x=>x.day===t.day);
+  $('todayBox').innerHTML='<label>Hôm nay</label><div class="today-main">'+study.label+'</div><div class="week-text">'+study.items.join(' • ')+'</div>';
+}
+
+function renderCurrentCycle(){
+  const mode=currentAutoMode(),m=MODES[mode];
+  $('currentCycle').innerHTML='<div><div class="eyebrow">CHẾ ĐỘ ĐƯỢC ĐỀ XUẤT HÔM NAY</div><h2>'+m.name+' • '+currentMonthLabel()+'</h2><p>'+m.desc+'</p></div><button class="btn primary no-print" id="goCurrent">Làm bài '+m.short.toLowerCase()+'</button>';
+  $('goCurrent').onclick=()=>{selectedMode=mode;switchView('quiz');};
+}
+
+function renderCycleCards(){
+  $('cycleCards').innerHTML=Object.entries(MODES).map(([k,m])=>'<article class="cycle-card '+m.tone+'"><div class="cycle-badge">'+m.short+'</div><h3>'+m.name+'</h3><p>'+m.desc+'</p><div class="cycle-meta"><b>'+m.questions+' câu/môn</b><span>≈ '+m.minutes+' phút</span></div><button class="btn secondary no-print" data-cycle="'+k+'">Chọn dạng này</button></article>').join('');
+  document.querySelectorAll('[data-cycle]').forEach(b=>b.onclick=()=>{selectedMode=b.dataset.cycle;switchView('quiz');});
+}
+
+function renderStudyWeek(){
+  const td=today().day;
+  $('studyWeek').innerHTML=STUDY_WEEK.map(x=>'<article class="day-card '+(x.day===td?'today':'')+'"><h3>'+x.label+(x.day===td?' • Hôm nay':'')+'</h3>'+x.items.map(i=>'<p>'+escapeHtml(i)+'</p>').join('')+'</article>').join('');
+}
+
+function renderTimeline(){
+  $('yearTimeline').innerHTML=TIMELINE.map(x=>'<div class="timeline-item '+x.kind+'"><div class="timeline-dot"></div><div><div class="timeline-head"><strong>'+x.label+'</strong><span>'+x.range+'</span></div><p>'+x.text+'</p></div></div>').join('');
+}
+
 function switchView(v){
-  document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('active',b.dataset.view===v);});
-  document.querySelectorAll('.view').forEach(function(x){x.classList.toggle('active',x.id==='view-'+v);});
-  if(v==='report')renderReport();if(v==='quiz'){renderQuizSubjects();renderQuizSetup();}window.scrollTo({top:0,behavior:'smooth'});
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
+  if(v==='quiz'){renderModePicker();renderQuizSubjects();renderQuizSetup();}
+  if(v==='report')renderReport();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-function latest(subject,weekOnly){return history().filter(function(x){return x.subject===subject&&(!weekOnly||x.week===currentWeek());})[0]||null;}
-function renderQuizSubjects(){
-  var out='';
-  Object.keys(SUBJECTS).forEach(function(k){var s=SUBJECTS[k],p=getPlan(k),l=latest(k,true);out+='<article class="subject-card '+(selectedSubject===k?'active':'')+'" data-subject="'+k+'"><div class="subject-icon">'+s.icon+'</div><h3>'+s.name+'</h3><p>'+(p.topics.length?p.topics.length+' chủ đề trong phạm vi':'Chưa chọn phạm vi tuần')+'</p><div class="latest">'+(l?l.percent+'% • '+l.level:'Chưa làm tuần này')+'</div></article>';});
-  $('quizSubjectCards').innerHTML=out;
-  document.querySelectorAll('.subject-card').forEach(function(c){c.addEventListener('click',function(){selectedSubject=c.dataset.subject;renderQuizSubjects();renderQuizSetup();});});
-}
-function candidates(){
-  var p=getPlan(selectedSubject);if(!p.topics.length)return BANK[selectedSubject];
-  return BANK[selectedSubject].filter(function(x){return p.topics.indexOf(x.topic)>=0;});
-}
-function renderQuizSetup(){
-  var s=SUBJECTS[selectedSubject],p=getPlan(selectedSubject),cs=candidates(),topics=p.topics.length?p.topics:s.topics.map(function(t){return t[0];});
-  var tags=topics.map(function(t){return'<span class="pill blue">'+escapeHtml(topicName(selectedSubject,t))+'</span>';}).join('');
-  $('quizSetup').innerHTML='<div class="quiz-setup-grid"><div><h3 style="margin-top:0">'+s.name+' • '+weekLabel(currentWeek())+'</h3><div class="scope-box"><strong>Phạm vi Quiz</strong><div class="scope-tags">'+tags+'</div>'+(p.note?'<p class="muted"><strong>Ghi chú:</strong> '+escapeHtml(p.note)+'</p>':'')+(!p.topics.length?'<p class="muted">Chưa chọn chủ đề tuần này; hệ thống đang dùng toàn bộ ngân hàng môn. Nên cập nhật tiến độ để đánh giá chính xác.</p>':'')+'</div></div><div><div class="form-row"><label>Số câu</label><select id="questionCount"><option>8</option><option selected>10</option><option>12</option></select></div><p class="muted">Có '+cs.length+' câu phù hợp.</p><button id="startQuizBtn" class="btn primary" style="width:100%">Bắt đầu kiểm tra</button><button id="backPlanBtn" class="btn secondary" style="width:100%;margin-top:8px">Sửa phạm vi tuần</button></div></div>';
-  $('startQuizBtn').onclick=startQuiz;$('backPlanBtn').onclick=function(){switchView('plan');};
-}
-function startQuiz(){
-  var cs=candidates(),n=Math.min(Number($('questionCount').value),cs.length);if(!n){toast('Chưa có câu hỏi phù hợp.');return;}
-  clearInterval(timer);activeQuiz={subject:selectedSubject,week:currentWeek(),questions:shuffle(cs).slice(0,n),answers:Array(n).fill(null),index:0,started:Date.now()};
-  $('quizSetup').classList.add('hidden');$('quizResult').classList.add('hidden');$('quizRunner').classList.remove('hidden');
-  timer=setInterval(function(){if(activeQuiz&&$('quizTimer'))$('quizTimer').textContent=fmt(Math.floor((Date.now()-activeQuiz.started)/1000));},1000);renderQuestion();
-}
-function renderQuestion(){
-  var z=activeQuiz,q=z.questions[z.index],sel=z.answers[z.index],answered=z.answers.filter(function(x){return x!==null;}).length;
-  var opts=q.options.map(function(o,i){return'<label class="answer '+(sel===i?'selected':'')+'"><input type="radio" name="answer" value="'+i+'" '+(sel===i?'checked':'')+'><span><b>'+String.fromCharCode(65+i)+'.</b> '+escapeHtml(o)+'</span></label>';}).join('');
-  $('quizRunner').innerHTML='<div class="quiz-toolbar"><div><strong>'+SUBJECTS[z.subject].name+'</strong><div class="progress" style="width:230px;max-width:55vw"><div style="width:'+Math.round((z.index+1)/z.questions.length*100)+'%"></div></div></div><div class="progress-meta"><span>'+answered+'/'+z.questions.length+' đã trả lời</span><span id="quizTimer">'+fmt(Math.floor((Date.now()-z.started)/1000))+'</span></div></div><div class="q-number">CÂU '+(z.index+1)+' / '+z.questions.length+' • '+escapeHtml(topicName(z.subject,q.topic))+'</div><div class="q-text">'+escapeHtml(q.text)+'</div><div class="answers">'+opts+'</div><div class="quiz-nav"><button id="prevBtn" class="btn secondary" '+(z.index===0?'disabled':'')+'>← Câu trước</button><div><button id="finishBtn" class="btn secondary">Nộp bài</button> <button id="nextBtn" class="btn primary">'+(z.index===z.questions.length-1?'Nộp bài':'Câu tiếp →')+'</button></div></div>';
-  document.querySelectorAll('input[name=answer]').forEach(function(r){r.onchange=function(){z.answers[z.index]=Number(r.value);renderQuestion();};});
-  $('prevBtn').onclick=function(){if(z.index>0){z.index--;renderQuestion();}};
-  $('nextBtn').onclick=function(){if(z.index<z.questions.length-1){z.index++;renderQuestion();}else submitQuiz();};$('finishBtn').onclick=submitQuiz;
-}
-function submitQuiz(){
-  var z=activeQuiz,missing=z.answers.filter(function(x){return x===null;}).length;if(missing&&!confirm('Còn '+missing+' câu chưa trả lời. Vẫn nộp bài?'))return;
-  clearInterval(timer);var correct=0,stats={},wrong=[];
-  z.questions.forEach(function(q,i){var ok=z.answers[i]===q.answer;if(ok)correct++;else wrong.push({q:q,chosen:z.answers[i],num:i+1});if(!stats[q.topic])stats[q.topic]={correct:0,total:0};stats[q.topic].total++;if(ok)stats[q.topic].correct++;});
-  var pct=Math.round(correct/z.questions.length*100),weak=Object.keys(stats).filter(function(t){return Math.round(stats[t].correct/stats[t].total*100)<70;}),elapsed=Math.floor((Date.now()-z.started)/1000);
-  var res={date:new Date().toISOString(),week:z.week,subject:z.subject,score:correct,total:z.questions.length,percent:pct,level:level(pct),elapsed:elapsed,weakTopics:weak,topicStats:stats};
-  var h=history();h.unshift(res);write(STORAGE_HISTORY,h.slice(0,200));$('quizRunner').classList.add('hidden');$('quizResult').classList.remove('hidden');renderResult(res,wrong);renderQuizSubjects();activeQuiz=null;
-}
-function advice(r){
-  var names=r.weakTopics.map(function(t){return topicName(r.subject,t);}).join(', ');
-  if(r.percent>=90)return'Giữ nhịp tốt; tăng dần câu vận dụng và kiểm tra lại có giới hạn thời gian.';
-  if(r.percent>=75)return'Chữa kỹ câu sai; mỗi phần chưa chắc làm thêm 3–5 câu tương tự'+(names?': '+names:'')+'.';
-  if(r.percent>=60)return'Ôn lại công thức/quy tắc và làm 8–10 câu cơ bản'+(names?' cho: '+names:'')+' trước khi tăng độ khó.';
-  return'Tạm chưa làm bài khó. Học lại nền tảng'+(names?' của: '+names:'')+'; mỗi phần làm 5 câu nhận biết + 5 câu thông hiểu.';
-}
-function renderResult(r,wrong){
-  var stats=Object.keys(r.topicStats).map(function(t){var v=r.topicStats[t],p=Math.round(v.correct/v.total*100),cl=p>=80?'good':p>=60?'warn':'bad';return'<div class="topic-stat"><span>'+escapeHtml(topicName(r.subject,t))+'</span><span class="pill '+cl+'">'+v.correct+'/'+v.total+' • '+p+'%</span></div>';}).join('');
-  var weak=r.weakTopics.length?r.weakTopics.map(function(t){return'<span class="pill bad">'+escapeHtml(topicName(r.subject,t))+'</span>';}).join(' '):'<span class="pill good">Không có nhóm lỗi nổi bật</span>';
-  var review=wrong.length?wrong.map(function(w){return'<div class="review-item"><h4>Câu '+w.num+'. '+escapeHtml(w.q.text)+'</h4><p><strong>Ken chọn:</strong> '+(w.chosen===null?'Chưa trả lời':escapeHtml(w.q.options[w.chosen]))+'</p><p><strong>Đáp án đúng:</strong> '+escapeHtml(w.q.options[w.q.answer])+'</p><div class="explain"><strong>Giải thích:</strong> '+escapeHtml(w.q.explain)+'</div></div>';}).join(''):'<div class="notice"><strong>Tốt:</strong> Không có câu sai trong lượt này.</div>';
-  $('quizResult').innerHTML='<div class="result-hero"><div class="result-top"><div><div class="eyebrow">KẾT QUẢ '+SUBJECTS[r.subject].name.toUpperCase()+'</div><div class="score-big">'+r.score+'/'+r.total+' • '+r.percent+'%</div><div class="result-level">'+r.level+'</div></div><button id="againBtn" class="btn secondary no-print">Làm Quiz khác</button></div><div class="metrics"><div class="metric"><b>'+r.score+'/'+r.total+'</b><span>Câu đúng</span></div><div class="metric"><b>'+r.percent+'%</b><span>Chính xác</span></div><div class="metric"><b>'+fmt(r.elapsed)+'</b><span>Thời gian</span></div><div class="metric"><b>'+r.weakTopics.length+'</b><span>Nhóm cần củng cố</span></div></div></div><div class="result-grid"><div class="result-box"><h3>Theo từng chủ đề</h3>'+stats+'</div><div class="result-box"><h3>Cần học nhiều hơn</h3><div>'+weak+'</div><h3 style="margin-top:16px">Nhiệm vụ tiếp theo</h3><p>'+escapeHtml(advice(r))+'</p></div></div><div class="review-list"><h3>Chữa câu sai</h3>'+review+'</div>';
-  $('againBtn').onclick=function(){$('quizResult').classList.add('hidden');$('quizSetup').classList.remove('hidden');renderQuizSetup();};$('quizResult').scrollIntoView({behavior:'smooth'});
-}
-function renderReport(){
-  var h=history(),cards='';
-  Object.keys(SUBJECTS).forEach(function(k){var l=latest(k,false);cards+='<article class="summary-card"><h3>'+SUBJECTS[k].name+'</h3><div class="summary-score">'+(l?l.percent+'%':'—')+'</div><p>'+(l?l.level+' • '+l.score+'/'+l.total:'Chưa có bài kiểm tra')+'</p>'+(l?'<p style="margin-top:5px">Cần chú ý: '+escapeHtml((l.weakTopics||[]).map(function(t){return topicName(k,t);}).join(', ')||'Không có nhóm lỗi nổi bật')+'</p>':'')+'</article>';});
-  $('summaryCards').innerHTML=cards;$('historyCount').textContent=h.length+' lượt kiểm tra';
-  $('historyBody').innerHTML=h.length?h.map(function(x){var w=(x.weakTopics||[]).map(function(t){return topicName(x.subject,t);}).join(', ')||'—',cl=x.percent>=80?'good':x.percent>=60?'warn':'bad';return'<tr><td>'+new Date(x.date).toLocaleDateString('vi-VN')+'</td><td>'+escapeHtml(x.week)+'</td><td><strong>'+SUBJECTS[x.subject].name+'</strong></td><td>'+x.score+'/'+x.total+' • '+x.percent+'%</td><td><span class="pill '+cl+'">'+x.level+'</span></td><td>'+escapeHtml(w)+'</td></tr>';}).join(''):'<tr><td colspan="6" class="empty">Chưa có dữ liệu. Hãy làm Quiz đầu tiên.</td></tr>';
-}
-function exportData(){var data={exportedAt:new Date().toISOString(),plans:plans(),history:history()},b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='ken-weekly-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(u);}
 
-document.addEventListener('DOMContentLoaded',function(){
-  $('weekInput').value=weekNow();renderPlan();renderQuizSubjects();renderQuizSetup();renderReport();
-  document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){switchView(b.dataset.view);};});
-  $('weekInput').onchange=function(){renderPlan();renderQuizSubjects();renderQuizSetup();renderReport();};
-  $('savePlanBtn').onclick=savePlan;$('starterBtn').onclick=starter;$('printBtn').onclick=function(){window.print();};$('exportBtn').onclick=exportData;
+function latest(subject,mode=null){
+  return history().find(x=>x.subject===subject&&(!mode||x.mode===mode))||null;
+}
+
+function renderModePicker(){
+  $('modePicker').innerHTML=Object.entries(MODES).map(([k,m])=>'<button class="mode-btn '+(selectedMode===k?'active':'')+'" data-mode="'+k+'"><strong>'+m.name+'</strong><span>'+m.questions+' câu • '+m.minutes+' phút</span></button>').join('');
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{selectedMode=b.dataset.mode;renderModePicker();renderQuizSubjects();renderQuizSetup();});
+}
+
+function renderQuizSubjects(){
+  $('quizSubjectCards').innerHTML=Object.keys(SUBJECTS).map(k=>{
+    const s=SUBJECTS[k],l=latest(k,selectedMode),scope=scopeFor(k,selectedMode);
+    return '<article class="subject-card '+(selectedSubject===k?'active':'')+'" data-subject="'+k+'"><div class="subject-icon">'+s.icon+'</div><h3>'+s.name+'</h3><p>'+scope.length+' chủ đề trong phạm vi</p><div class="latest">'+(l?l.percent+'% • '+l.level:'Chưa làm dạng này')+'</div></article>';
+  }).join('');
+  document.querySelectorAll('.subject-card').forEach(c=>c.onclick=()=>{selectedSubject=c.dataset.subject;renderQuizSubjects();renderQuizSetup();});
+}
+
+function renderQuizSetup(){
+  const s=SUBJECTS[selectedSubject],m=MODES[selectedMode],scope=scopeFor(selectedSubject,selectedMode),cs=candidates();
+  const weak=weakTopicsFor(selectedSubject);
+  $('quizSetup').innerHTML='<div class="quiz-setup-grid"><div><h3 style="margin-top:0">'+s.name+' • '+m.name+'</h3><div class="scope-box"><strong>Phạm vi tự động</strong><div class="scope-tags">'+scope.map(t=>'<span class="pill blue">'+escapeHtml(topicName(selectedSubject,t))+'</span>').join('')+'</div>'+(weak.length?'<p class="muted"><strong>Được cài lại vì từng yếu:</strong> '+weak.map(t=>escapeHtml(topicName(selectedSubject,t))).join(', ')+'</p>':'')+'</div></div><div><div class="exam-spec"><div><b>'+Math.min(m.questions,cs.length)+'</b><span>Câu</span></div><div><b>'+m.minutes+'</b><span>Phút gợi ý</span></div></div><p class="muted">'+m.desc+'</p><button id="startQuizBtn" class="btn primary" style="width:100%">Bắt đầu '+m.name.toLowerCase()+'</button></div></div>';
+  $('startQuizBtn').onclick=startQuiz;
+}
+
+function startQuiz(){
+  const cs=candidates(),m=MODES[selectedMode],n=Math.min(m.questions,cs.length);
+  if(!n){toast('Chưa có câu hỏi phù hợp.');return;}
+  clearInterval(timer);
+  activeQuiz={subject:selectedSubject,mode:selectedMode,questions:shuffle(cs).slice(0,n),answers:Array(n).fill(null),index:0,started:Date.now()};
+  $('quizSetup').classList.add('hidden');$('quizResult').classList.add('hidden');$('quizRunner').classList.remove('hidden');
+  timer=setInterval(()=>{if(activeQuiz&&$('quizTimer'))$('quizTimer').textContent=fmt(Math.floor((Date.now()-activeQuiz.started)/1000));},1000);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const z=activeQuiz,q=z.questions[z.index],sel=z.answers[z.index],answered=z.answers.filter(x=>x!==null).length;
+  const opts=q.options.map((o,i)=>'<label class="answer '+(sel===i?'selected':'')+'"><input type="radio" name="answer" value="'+i+'" '+(sel===i?'checked':'')+'><span><b>'+String.fromCharCode(65+i)+'.</b> '+escapeHtml(o)+'</span></label>').join('');
+  $('quizRunner').innerHTML='<div class="quiz-toolbar"><div><strong>'+SUBJECTS[z.subject].name+' • '+MODES[z.mode].name+'</strong><div class="progress" style="width:230px;max-width:55vw"><div style="width:'+Math.round((z.index+1)/z.questions.length*100)+'%"></div></div></div><div class="progress-meta"><span>'+answered+'/'+z.questions.length+' đã trả lời</span><span id="quizTimer">'+fmt(Math.floor((Date.now()-z.started)/1000))+'</span></div></div><div class="q-number">CÂU '+(z.index+1)+' / '+z.questions.length+' • '+escapeHtml(topicName(z.subject,q.topic))+'</div><div class="q-text">'+escapeHtml(q.text)+'</div><div class="answers">'+opts+'</div><div class="quiz-nav"><button id="prevBtn" class="btn secondary" '+(z.index===0?'disabled':'')+'>← Câu trước</button><div><button id="finishBtn" class="btn secondary">Nộp bài</button> <button id="nextBtn" class="btn primary">'+(z.index===z.questions.length-1?'Nộp bài':'Câu tiếp →')+'</button></div></div>';
+  document.querySelectorAll('input[name=answer]').forEach(r=>r.onchange=()=>{z.answers[z.index]=Number(r.value);renderQuestion();});
+  $('prevBtn').onclick=()=>{if(z.index>0){z.index--;renderQuestion();}};
+  $('nextBtn').onclick=()=>{if(z.index<z.questions.length-1){z.index++;renderQuestion();}else submitQuiz();};
+  $('finishBtn').onclick=submitQuiz;
+}
+
+function submitQuiz(){
+  const z=activeQuiz,missing=z.answers.filter(x=>x===null).length;
+  if(missing&&!confirm('Còn '+missing+' câu chưa trả lời. Vẫn nộp bài?'))return;
+  clearInterval(timer);
+  let correct=0;const stats={},wrong=[];
+  z.questions.forEach((q,i)=>{const ok=z.answers[i]===q.answer;if(ok)correct++;else wrong.push({q,chosen:z.answers[i],num:i+1});if(!stats[q.topic])stats[q.topic]={correct:0,total:0};stats[q.topic].total++;if(ok)stats[q.topic].correct++;});
+  const pct=Math.round(correct/z.questions.length*100),weak=Object.keys(stats).filter(t=>Math.round(stats[t].correct/stats[t].total*100)<70),elapsed=Math.floor((Date.now()-z.started)/1000);
+  const res={date:new Date().toISOString(),mode:z.mode,cycleLabel:MODES[z.mode].name,subject:z.subject,score:correct,total:z.questions.length,percent:pct,level:level(pct),elapsed,weakTopics:weak,topicStats:stats};
+  const h=history();h.unshift(res);write(STORAGE_HISTORY,h.slice(0,300));
+  $('quizRunner').classList.add('hidden');$('quizResult').classList.remove('hidden');renderResult(res,wrong);renderQuizSubjects();activeQuiz=null;
+}
+
+function advice(r){
+  const names=r.weakTopics.map(t=>topicName(r.subject,t)).join(', ');
+  if(r.percent>=90)return r.mode==='final'?'Đã vững ở mức cuối kỳ. Chuyển sang đề tổng hợp có giới hạn thời gian.':'Duy trì, tháng sau tăng tỷ lệ câu vận dụng.';
+  if(r.percent>=75)return'Chữa toàn bộ câu sai; sau 2–3 ngày làm lại 5 câu ở '+(names||'phần vừa sai')+'.';
+  if(r.percent>=60)return'Ôn lại công thức/quy tắc, rồi làm 8–10 câu cơ bản ở '+(names||'chuyên đề chưa chắc')+'.';
+  return'Chưa tăng độ khó. Học lại nền tảng '+(names||'các phần sai')+' và kiểm tra lại bằng Quiz tháng trước khi chuyển tầng.';
+}
+
+function renderResult(r,wrong){
+  const stats=Object.keys(r.topicStats).map(t=>{const v=r.topicStats[t],p=Math.round(v.correct/v.total*100),cl=p>=80?'good':p>=60?'warn':'bad';return'<div class="topic-stat"><span>'+escapeHtml(topicName(r.subject,t))+'</span><span class="pill '+cl+'">'+v.correct+'/'+v.total+' • '+p+'%</span></div>';}).join('');
+  const weak=r.weakTopics.length?r.weakTopics.map(t=>'<span class="pill bad">'+escapeHtml(topicName(r.subject,t))+'</span>').join(' '):'<span class="pill good">Không có nhóm lỗi nổi bật</span>';
+  const review=wrong.length?wrong.map(w=>'<div class="review-item"><h4>Câu '+w.num+'. '+escapeHtml(w.q.text)+'</h4><p><strong>Ken chọn:</strong> '+(w.chosen===null?'Chưa trả lời':escapeHtml(w.q.options[w.chosen]))+'</p><p><strong>Đáp án đúng:</strong> '+escapeHtml(w.q.options[w.q.answer])+'</p><div class="explain"><strong>Giải thích:</strong> '+escapeHtml(w.q.explain)+'</div></div>').join(''):'<div class="notice"><strong>Tốt:</strong> Không có câu sai trong lượt này.</div>';
+  $('quizResult').innerHTML='<div class="result-hero"><div class="result-top"><div><div class="eyebrow">'+r.cycleLabel.toUpperCase()+' • '+SUBJECTS[r.subject].name.toUpperCase()+'</div><div class="score-big">'+r.score+'/'+r.total+' • '+r.percent+'%</div><div class="result-level">'+r.level+'</div></div><button id="againBtn" class="btn secondary no-print">Làm bài khác</button></div><div class="metrics"><div class="metric"><b>'+r.score+'/'+r.total+'</b><span>Câu đúng</span></div><div class="metric"><b>'+r.percent+'%</b><span>Chính xác</span></div><div class="metric"><b>'+fmt(r.elapsed)+'</b><span>Thời gian</span></div><div class="metric"><b>'+r.weakTopics.length+'</b><span>Nhóm cần củng cố</span></div></div></div><div class="result-grid"><div class="result-box"><h3>Theo từng chủ đề</h3>'+stats+'</div><div class="result-box"><h3>Cần học nhiều hơn</h3><div>'+weak+'</div><h3 style="margin-top:16px">Nhiệm vụ tiếp theo</h3><p>'+escapeHtml(advice(r))+'</p></div></div><div class="review-list"><h3>Chữa câu sai</h3>'+review+'</div>';
+  $('againBtn').onclick=()=>{$('quizResult').classList.add('hidden');$('quizSetup').classList.remove('hidden');renderQuizSetup();};
+  $('quizResult').scrollIntoView({behavior:'smooth'});
+}
+
+function renderWeaknessBoard(){
+  let rows=[];
+  Object.keys(SUBJECTS).forEach(s=>{
+    const ws=weakTopicsFor(s);
+    if(ws.length)rows.push('<div class="weak-row"><strong>'+SUBJECTS[s].name+'</strong><div>'+ws.map(t=>'<span class="pill bad">'+escapeHtml(topicName(s,t))+'</span>').join(' ')+'</div></div>');
+  });
+  $('weaknessBoard').innerHTML='<div class="panel-head" style="padding:0 0 12px"><h3>Chuyên đề cần quay lại</h3><span class="muted">Tính từ các bài gần nhất</span></div>'+(rows.length?rows.join(''):'<p class="muted">Chưa có đủ dữ liệu để xác định điểm yếu.</p>');
+}
+
+function renderReport(){
+  const h=history();
+  $('summaryCards').innerHTML=Object.keys(SUBJECTS).map(k=>{const l=latest(k);return'<article class="summary-card"><h3>'+SUBJECTS[k].name+'</h3><div class="summary-score">'+(l?l.percent+'%':'—')+'</div><p>'+(l?l.level+' • '+(l.cycleLabel||'Bài kiểm tra'):'Chưa có bài kiểm tra')+'</p>'+(l?'<p style="margin-top:5px">Cần chú ý: '+escapeHtml((l.weakTopics||[]).map(t=>topicName(k,t)).join(', ')||'Không có nhóm lỗi nổi bật')+'</p>':'')+'</article>';}).join('');
+  renderWeaknessBoard();
+  $('historyCount').textContent=h.length+' lượt kiểm tra';
+  $('historyBody').innerHTML=h.length?h.map(x=>{const w=(x.weakTopics||[]).map(t=>topicName(x.subject,t)).join(', ')||'—',cl=x.percent>=80?'good':x.percent>=60?'warn':'bad';return'<tr><td>'+new Date(x.date).toLocaleDateString('vi-VN')+'</td><td>'+(x.cycleLabel||x.mode||'Theo tuần')+'</td><td><strong>'+SUBJECTS[x.subject].name+'</strong></td><td>'+x.score+'/'+x.total+' • '+x.percent+'%</td><td><span class="pill '+cl+'">'+x.level+'</span></td><td>'+escapeHtml(w)+'</td></tr>';}).join(''):'<tr><td colspan="6" class="empty">Chưa có dữ liệu. Hãy làm bài đầu tiên.</td></tr>';
+}
+
+function exportData(){
+  const data={exportedAt:new Date().toISOString(),history:history(),studyWeek:STUDY_WEEK,timeline:TIMELINE};
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download='ken-study-cycle-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(u);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  selectedMode=currentAutoMode();
+  renderToday();renderCurrentCycle();renderCycleCards();renderStudyWeek();renderTimeline();
+  renderModePicker();renderQuizSubjects();renderQuizSetup();renderReport();
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+  $('printBtn').onclick=()=>window.print();
+  $('exportBtn').onclick=exportData;
 });
