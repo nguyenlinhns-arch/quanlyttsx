@@ -1,46 +1,23 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#173a70">
-  <title>Ken • Kiểm tra kiến thức lớp 9</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173a70">
+<title>Ken • Kiểm tra kiến thức</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="eyebrow">KEN • LỚP 9 • QUẢNG NINH</div>
-    <h1>Kiểm tra kiến thức</h1>
-    <p>Chọn mốc → chọn môn → làm bài → xem phần đã vững và phần cần học lại.</p>
-  </div>
-</header>
-
+<header class="top"><div class="wrap"><div class="eyebrow">KEN • LỚP 9</div><h1>Kiểm tra kiến thức</h1><p>Chọn mốc, chọn môn và bắt đầu.</p></div></header>
 <main class="wrap">
-  <section>
-    <h2>1. Chọn mốc kiểm tra</h2>
-    <div id="milestones" class="milestones"></div>
-  </section>
-
-  <section>
-    <h2>2. Chọn môn</h2>
-    <div id="subjects" class="subjects"></div>
-  </section>
-
-  <section id="setup" class="card setup"></section>
-  <section id="quiz" class="card hidden"></section>
+  <div id="milestones" class="segmented"></div>
+  <div id="subjects" class="subjects"></div>
+  <section id="ready" class="ready"></section>
+  <section id="quiz" class="panel hidden"></section>
   <section id="result" class="hidden"></section>
-
-  <section class="summary-section">
-    <h2>Đánh giá gần nhất</h2>
-    <div id="summary" class="summary"></div>
-  </section>
+  <section id="recent" class="recent"></section>
 </main>
-
-<footer class="wrap">
-  Nguồn xây dựng: đề và cấu trúc kiểm tra của Quảng Ninh; ưu tiên tài liệu chính thức và đề thực tế của các trường trong tỉnh.
-</footer>
-
+<footer>Toán • Tiếng Anh • Vật lí • Hóa học</footer>
 <script src="app.js"></script>
 </body>
 </html>
