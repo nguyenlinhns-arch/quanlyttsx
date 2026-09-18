@@ -1,21 +1,26 @@
 'use strict';
 
 const SUBJECTS={
-  math:{name:'Toán',icon:'∑',topics:[
-    ['sqrt','Căn bậc hai & căn thức'],['radical','Biến đổi căn thức'],['system','Hệ phương trình'],['triangle','Hệ thức lượng tam giác vuông'],['circle','Đường tròn']
-  ]},
-  english:{name:'Tiếng Anh',icon:'EN',topics:[
-    ['tenses','Thì & dạng động từ'],['passive','Câu bị động'],['relative','Mệnh đề quan hệ'],['conditional','Câu điều kiện'],['vocab','Từ loại & từ vựng']
-  ]},
-  physics:{name:'Vật lí',icon:'Ω',topics:[
-    ['ohm','Điện trở & định luật Ôm'],['circuit','Mạch nối tiếp/song song'],['power','Công suất điện'],['energy','Điện năng'],['joule','Jun–Len-xơ']
-  ]},
-  chemistry:{name:'Hóa học',icon:'H₂',topics:[
-    ['oxide','Oxit'],['acid','Axit'],['base','Bazơ'],['salt','Muối'],['exchange','Phản ứng trao đổi']
-  ]}
+  math:{name:'Toán',icon:'∑',topics:[['sqrt','Căn bậc hai & căn thức'],['radical','Biến đổi căn thức'],['system','Hệ phương trình'],['triangle','Hệ thức lượng tam giác vuông'],['circle','Đường tròn']]},
+  literature:{name:'Ngữ văn',icon:'V',topics:[['reading','Đọc hiểu'],['writing','Nghị luận xã hội'],['literary','Nghị luận văn học']]},
+  english:{name:'Tiếng Anh',icon:'EN',topics:[['tenses','Thì & dạng động từ'],['passive','Câu bị động'],['relative','Mệnh đề quan hệ'],['conditional','Câu điều kiện'],['vocab','Từ loại & từ vựng']]},
+  physics:{name:'Vật lí',icon:'Ω',topics:[['ohm','Điện trở & định luật Ôm'],['circuit','Mạch nối tiếp/song song'],['power','Công suất điện'],['energy','Điện năng'],['joule','Jun–Len-xơ']]},
+  chemistry:{name:'Hóa học',icon:'H₂',topics:[['oxide','Oxit'],['acid','Axit'],['base','Bazơ'],['salt','Muối'],['exchange','Phản ứng trao đổi']]},
+  biology:{name:'Sinh học',icon:'DNA',topics:[['genetics','Di truyền'],['variation','Biến dị'],['ecology','Sinh thái']]},
+  history:{name:'Lịch sử',icon:'LS',topics:[['vietnam','Lịch sử Việt Nam'],['world','Lịch sử thế giới']]},
+  geography:{name:'Địa lí',icon:'ĐL',topics:[['population','Dân cư'],['economy','Kinh tế'],['regions','Các vùng kinh tế']]},
+  civics:{name:'GDCD',icon:'CD',topics:[['law','Pháp luật'],['rights','Quyền & nghĩa vụ'],['ethics','Đạo đức công dân']]},
+  informatics:{name:'Tin học',icon:'IT',topics:[['algorithm','Thuật toán'],['data','Dữ liệu'],['digital','Kĩ năng số']]},
+  chinese:{name:'Tiếng Trung',icon:'中',topics:[['vocab','Từ vựng'],['grammar','Ngữ pháp'],['reading','Đọc hiểu']]},
+  french:{name:'Tiếng Pháp',icon:'FR',topics:[['vocab','Từ vựng'],['grammar','Ngữ pháp'],['reading','Đọc hiểu']]}
 };
 
-const STARTER={math:['sqrt','radical'],english:['tenses','passive'],physics:['ohm','circuit'],chemistry:['oxide','acid']};
+const GROUPS={
+  entrance:{name:'Thi vào 10',subjects:['math','literature','english']},
+  science:{name:'KHTN',subjects:['physics','chemistry','biology']},
+  social:{name:'KHXH',subjects:['history','geography','civics']},
+  other:{name:'Khác',subjects:['informatics','chinese','french']}
+};
 
 function Q(id,topic,text,options,answer,explain){return{id:id,topic:topic,text:text,options:options,answer:answer,explain:explain};}
 
@@ -96,54 +101,77 @@ Q('c15','exchange','Na₂CO₃ + 2HCl tạo khí:',['H₂','CO₂','O₂','Cl₂
 
 
 
-const KEY='kenSimple.history.v1';
+
+const KEY='kenSimple.history.v2';
 const MODES={
   month:{name:'Tháng',full:'Ôn tháng'},
   midterm:{name:'Giữa kỳ',full:'Giữa kỳ'},
   final:{name:'Cuối kỳ',full:'Cuối kỳ'}
 };
 const MONTH_SCOPE={
-  math:['sqrt','radical'],
-  english:['tenses','vocab'],
-  physics:['ohm','circuit'],
-  chemistry:['oxide','acid']
+  math:['sqrt','radical'], english:['tenses','vocab'], physics:['ohm','circuit'], chemistry:['oxide','acid']
 };
 const MID_SCOPE={
-  math:['sqrt','radical','system','triangle'],
-  english:['tenses','passive','vocab'],
-  physics:['ohm','circuit','power'],
-  chemistry:['oxide','acid','base']
+  math:['sqrt','radical','system','triangle'], english:['tenses','passive','vocab'], physics:['ohm','circuit','power'], chemistry:['oxide','acid','base']
 };
 
-let mode='month',subject='math',state=null,timer=null;
+let mode='month',group='entrance',subject='math',state=null,timer=null;
 const $=id=>document.getElementById(id);
 function hist(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}}
 function save(v){localStorage.setItem(KEY,JSON.stringify(v))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function topicName(s,t){const x=SUBJECTS[s].topics.find(v=>v[0]===t);return x?x[1]:t}
-function scope(s,m){if(m==='month')return MONTH_SCOPE[s];if(m==='midterm')return MID_SCOPE[s];return SUBJECTS[s].topics.map(x=>x[0])}
-function qs(){const sc=scope(subject,mode);return BANK[subject].filter(q=>sc.includes(q.topic))}
+function isReady(s){return Array.isArray(BANK[s])&&BANK[s].length>0}
+function scope(s,m){
+  if(!isReady(s))return SUBJECTS[s].topics.map(x=>x[0]);
+  if(m==='month')return MONTH_SCOPE[s]||SUBJECTS[s].topics.map(x=>x[0]);
+  if(m==='midterm')return MID_SCOPE[s]||SUBJECTS[s].topics.map(x=>x[0]);
+  return SUBJECTS[s].topics.map(x=>x[0])
+}
+function qs(){const sc=scope(subject,mode);return (BANK[subject]||[]).filter(q=>sc.includes(q.topic))}
 function latest(s){return hist().find(x=>x.subject===s)||null}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function grade(p){return p>=85?'Vững':p>=70?'Khá':p>=55?'Đạt':'Cần học lại'}
 
-function renderSelectors(){
+function renderMilestones(){
   $('milestones').innerHTML=Object.entries(MODES).map(([k,v])=>'<button class="'+(k===mode?'active':'')+'" data-mode="'+k+'">'+v.name+'</button>').join('');
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;renderSelectors();renderReady()});
-  $('subjects').innerHTML=Object.keys(SUBJECTS).map(k=>{const s=SUBJECTS[k],l=latest(k);return'<button class="subject '+(k===subject?'active':'')+'" data-sub="'+k+'"><div class="subject-icon">'+s.icon+'</div>'+s.name+'<small>'+(l?l.percent+'% gần nhất':'Chưa làm')+'</small></button>'}).join('');
-  document.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{subject=b.dataset.sub;renderSelectors();renderReady()});
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;renderMilestones();renderReady()});
+}
+
+function renderGroups(){
+  $('subjectGroups').innerHTML=Object.entries(GROUPS).map(([k,v])=>'<button class="'+(k===group?'active':'')+'" data-group="'+k+'">'+v.name+'</button>').join('');
+  document.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{
+    group=b.dataset.group;
+    if(!GROUPS[group].subjects.includes(subject))subject=GROUPS[group].subjects[0];
+    renderGroups();renderSubjects();renderReady();renderRecent();
+  });
+}
+
+function renderSubjects(){
+  const list=GROUPS[group].subjects;
+  $('subjects').innerHTML=list.map(k=>{
+    const s=SUBJECTS[k],l=latest(k),ready=isReady(k);
+    const status=l?l.percent+'% gần nhất':(ready?'Làm được ngay':'Nguồn đã có');
+    return '<button class="subject '+(k===subject?'active':'')+' '+(!ready?'pending':'')+'" data-sub="'+k+'"><div class="subject-icon">'+s.icon+'</div>'+s.name+'<small>'+status+'</small></button>';
+  }).join('');
+  document.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{subject=b.dataset.sub;renderSubjects();renderReady()});
 }
 
 function renderReady(){
-  const c=qs(),names=scope(subject,mode).map(t=>topicName(subject,t)).join(' • ');
+  const ready=isReady(subject),c=qs(),names=scope(subject,mode).map(t=>topicName(subject,t)).join(' • ');
   $('ready').classList.remove('hidden');$('quiz').classList.add('hidden');$('result').classList.add('hidden');
+  if(!ready){
+    $('ready').innerHTML='<div class="ready-top"><div><h2>'+SUBJECTS[subject].name+'</h2><p>Đã có thư mục và nguồn đề Quảng Ninh trong kho dữ liệu.</p></div><button class="btn secondary" disabled>Đang chuẩn hóa</button></div><div class="topics">'+esc(names)+'</div><div class="source-note">Chỉ mở Quiz khi câu hỏi đã được chuẩn hóa từ đề chính thức/đề trường có nguồn rõ ràng.</div>';
+    return;
+  }
   $('ready').innerHTML='<div class="ready-top"><div><h2>'+MODES[mode].full+' • '+SUBJECTS[subject].name+'</h2><p>'+c.length+' câu kiểm tra</p></div><button id="start" class="btn primary">Bắt đầu</button></div><div class="topics">'+esc(names)+'</div>';
   $('start').onclick=startQuiz;
 }
 
 function startQuiz(){
-  clearInterval(timer);
   const questions=shuffle(qs());
+  if(!questions.length)return;
+  clearInterval(timer);
   state={questions,answers:Array(questions.length).fill(null),index:0,started:Date.now()};
   $('ready').classList.add('hidden');$('result').classList.add('hidden');$('quiz').classList.remove('hidden');
   timer=setInterval(()=>{if($('clock')&&state)$('clock').textContent=Math.floor((Date.now()-state.started)/1000)+'s'},1000);
@@ -168,7 +196,7 @@ function submit(){
   const r={date:new Date().toISOString(),mode,subject,score:correct,total:state.questions.length,percent,level:grade(percent),strongTopics:strong,weakTopics:weak};
   const h=hist();h.unshift(r);save(h.slice(0,100));
   $('quiz').classList.add('hidden');$('result').classList.remove('hidden');
-  renderResult(r,wrong);renderSelectors();renderRecent();state=null;
+  renderResult(r,wrong);renderSubjects();renderRecent();state=null;
 }
 
 function nextTask(r){
@@ -186,7 +214,8 @@ function renderResult(r,wrong){
 }
 
 function renderRecent(){
-  $('recent').innerHTML='<h2>Kết quả gần nhất</h2><div class="recent-grid">'+Object.keys(SUBJECTS).map(k=>{const l=latest(k);return'<div class="recent-item"><span>'+SUBJECTS[k].name+'</span><b>'+(l?l.percent+'%':'—')+'</b><span>'+(l?l.level:'Chưa kiểm tra')+'</span></div>'}).join('')+'</div>';
+  const list=GROUPS[group].subjects;
+  $('recent').innerHTML='<h2>Kết quả gần nhất</h2><div class="recent-grid">'+list.map(k=>{const l=latest(k);return'<div class="recent-item"><span>'+SUBJECTS[k].name+'</span><b>'+(l?l.percent+'%':'—')+'</b><span>'+(l?l.level:(isReady(k)?'Chưa kiểm tra':'Đang chuẩn hóa'))+'</span></div>'}).join('')+'</div>';
 }
 
-document.addEventListener('DOMContentLoaded',()=>{renderSelectors();renderReady();renderRecent()});
+document.addEventListener('DOMContentLoaded',()=>{renderMilestones();renderGroups();renderSubjects();renderReady();renderRecent()});
