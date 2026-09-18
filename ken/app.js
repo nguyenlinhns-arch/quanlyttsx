@@ -92,251 +92,118 @@ Q('c15','exchange','Na₂CO₃ + 2HCl tạo khí:',['H₂','CO₂','O₂','Cl₂
 
 
 
-const STORAGE_HISTORY='kenWeekly.history.v3';
 
-const MODES={
-  month:{name:'Ôn tháng',short:'Tháng',questions:10,minutes:25,desc:'Kiểm tra phần vừa học trong tháng và lặp lại lỗi cũ.',tone:'blue'},
-  midterm:{name:'Ôn giữa kỳ',short:'Giữa kỳ',questions:12,minutes:40,desc:'Cộng dồn kiến thức từ đầu học kỳ, tăng câu vận dụng.',tone:'warn'},
-  final:{name:'Ôn cuối kỳ',short:'Cuối kỳ',questions:15,minutes:55,desc:'Bao phủ toàn học kỳ, ưu tiên chuyên đề từng mất điểm.',tone:'good'}
+
+const HISTORY_KEY='kenMilestone.history.v1';
+
+const MILESTONES={
+  month:{name:'Ôn tháng',desc:'Kiểm tra phần kiến thức đang học trong tháng.',target:'Theo tiến độ hiện tại'},
+  midterm:{name:'Giữa kỳ',desc:'Kiểm tra phần kiến thức đã học từ đầu học kỳ.',target:'Cộng dồn kiến thức'},
+  final:{name:'Cuối kỳ',desc:'Kiểm tra tổng hợp toàn học kỳ.',target:'Tổng hợp và phân loại'}
 };
-
-const STUDY_WEEK=[
-  {day:1,label:'Thứ 2',items:['Ngày đệm','Chữa lỗi 15–20 phút']},
-  {day:2,label:'Thứ 3',items:['Tiếng Anh 16:15–18:15','Ôn nhanh 10 phút sau buổi học']},
-  {day:3,label:'Thứ 4',items:['Hóa 16:30–18:30','Ôn công thức/phản ứng 15 phút']},
-  {day:4,label:'Thứ 5',items:['Tiếng Anh 16:15–18:15','Quiz ngắn 8–10 câu']},
-  {day:5,label:'Thứ 6',items:['Ngày đệm','Chữa phần yếu nhất tuần']},
-  {day:6,label:'Thứ 7',items:['Toán 09:00–11:00','Cuối tháng: làm bài Toán tháng']},
-  {day:0,label:'Chủ nhật',items:['Lý 07:00–09:00','Toán 09:00–11:00','Tổng kết tuần 15 phút']}
-];
 
 const MONTH_SCOPE={
-  9:{math:['sqrt','radical'],english:['tenses','vocab'],physics:['ohm','circuit'],chemistry:['oxide','acid']},
-  10:{math:['sqrt','radical','system'],english:['tenses','passive','vocab'],physics:['ohm','circuit','power'],chemistry:['oxide','acid','base']},
-  11:{math:['radical','system','triangle'],english:['passive','relative','vocab'],physics:['circuit','power','energy'],chemistry:['acid','base','salt']},
-  12:{math:['system','triangle','circle'],english:['relative','conditional','vocab'],physics:['power','energy','joule'],chemistry:['base','salt','exchange']},
-  1:{math:['sqrt','radical','system','triangle','circle'],english:['tenses','passive','relative','conditional','vocab'],physics:['ohm','circuit','power','energy','joule'],chemistry:['oxide','acid','base','salt','exchange']}
+  math:['sqrt','radical'],
+  english:['tenses','vocab'],
+  physics:['ohm','circuit'],
+  chemistry:['oxide','acid']
+};
+const MID_SCOPE={
+  math:['sqrt','radical','system','triangle'],
+  english:['tenses','passive','vocab'],
+  physics:['ohm','circuit','power'],
+  chemistry:['oxide','acid','base']
 };
 
-const TIMELINE=[
-  {label:'Tháng 9',range:'07–30/09',kind:'month',text:'Khởi động HKI • củng cố nền tảng • lấy mốc năng lực ban đầu.'},
-  {label:'Tháng 10',range:'01–18/10',kind:'month',text:'Ôn tháng 10 • tăng dần vận dụng.'},
-  {label:'Giữa kỳ I',range:'19/10–08/11',kind:'midterm',text:'Cửa sổ ôn giữa kỳ I • cộng dồn tháng 9–10.'},
-  {label:'Tháng 11',range:'09–30/11',kind:'month',text:'Chữa lỗi giữa kỳ • học tiếp kiến thức mới.'},
-  {label:'Tháng 12',range:'01–20/12',kind:'month',text:'Ôn tháng 12 • chuẩn bị tổng hợp HKI.'},
-  {label:'Cuối kỳ I',range:'21/12–10/01',kind:'final',text:'Ôn toàn HKI • kiểm tra đủ 4 môn.'},
-  {label:'Giữa kỳ II',range:'01–21/03',kind:'midterm',text:'Cộng dồn nội dung HKII đã học; ưu tiên lỗi lặp.'},
-  {label:'Cuối kỳ II',range:'19/04–09/05',kind:'final',text:'Hoàn tất kiến thức năm học trước giai đoạn nước rút.'},
-  {label:'Vào 10',range:'10–19/05',kind:'entrance',text:'Chuyển sang đề thi thật, ưu tiên Toán và Tiếng Anh.'}
-];
-
-let selectedSubject='math';
-let selectedMode='month';
-let activeQuiz=null;
+let milestone='month';
+let subject='math';
+let quizState=null;
 let timer=null;
 const $=id=>document.getElementById(id);
 
-function read(key,def){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(def));}catch(e){return def;}}
-function write(key,val){localStorage.setItem(key,JSON.stringify(val));}
-function history(){return read(STORAGE_HISTORY,[]);}
-function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function topicName(subject,key){const t=SUBJECTS[subject].topics.find(x=>x[0]===key);return t?t[1]:key;}
+function readHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return[];}}
+function saveHistory(v){localStorage.setItem(HISTORY_KEY,JSON.stringify(v));}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function topicName(s,t){const row=SUBJECTS[s].topics.find(x=>x[0]===t);return row?row[1]:t;}
+function scopeFor(s,m){if(m==='month')return MONTH_SCOPE[s];if(m==='midterm')return MID_SCOPE[s];return SUBJECTS[s].topics.map(x=>x[0]);}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function fmt(sec){const m=Math.floor(sec/60),s=sec%60;return m?m+' phút '+String(s).padStart(2,'0')+' giây':s+' giây';}
-function level(p){return p>=90?'Vững':p>=75?'Khá':p>=60?'Đạt':'Cần củng cố';}
-function toast(msg){const x=document.createElement('div');x.className='toast';x.textContent=msg;document.body.appendChild(x);setTimeout(()=>x.remove(),2200);}
-function today(){const d=new Date();return{d,month:d.getMonth()+1,day:d.getDay(),date:d.getDate()};}
-function term(){const m=today().month;return (m>=9||m===1)?1:2;}
+function grade(p){return p>=85?'Vững':p>=70?'Khá':p>=55?'Đạt':'Cần học lại';}
+function latest(s){return readHistory().find(x=>x.subject===s)||null;}
 
-function currentAutoMode(){
-  const {month,date}=today();
-  if(month===10&&date>=19)return'midterm';
-  if(month===11&&date<=8)return'midterm';
-  if(month===12&&date>=21)return'final';
-  if(month===1&&date<=10)return'final';
-  if(month===3&&date<=21)return'midterm';
-  if(month===4&&date>=19)return'final';
-  if(month===5&&date<=9)return'final';
-  return'month';
+function renderMilestones(){
+  $('milestones').innerHTML=Object.entries(MILESTONES).map(([k,v])=>'<button class="milestone '+(k===milestone?'active':'')+'" data-m="'+k+'"><strong>'+v.name+'</strong><span>'+v.desc+'</span></button>').join('');
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{milestone=b.dataset.m;renderMilestones();renderSetup();});
 }
 
-function currentMonthLabel(){
-  const m=today().month;
-  return m===1?'Tháng 1 • cuối HKI':'Tháng '+m;
+function renderSubjects(){
+  $('subjects').innerHTML=Object.keys(SUBJECTS).map(k=>{const s=SUBJECTS[k],l=latest(k);return'<button class="subject '+(k===subject?'active':'')+'" data-s="'+k+'"><div class="subject-icon">'+s.icon+'</div><b>'+s.name+'</b><small>'+(l?l.percent+'% gần nhất':'Chưa kiểm tra')+'</small></button>';}).join('');
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{subject=b.dataset.s;renderSubjects();renderSetup();});
 }
 
-function weakTopicsFor(subject){
-  const scores={};
-  history().filter(x=>x.subject===subject).slice(0,8).forEach(r=>{
-    Object.entries(r.topicStats||{}).forEach(([t,v])=>{
-      if(!scores[t])scores[t]={c:0,n:0};
-      scores[t].c+=v.correct;scores[t].n+=v.total;
-    });
-  });
-  return Object.keys(scores).filter(t=>scores[t].n&&scores[t].c/scores[t].n<.7);
-}
-
-function monthTopics(subject){
-  const m=today().month;
-  const map=MONTH_SCOPE[m]||null;
-  return map?map[subject]:SUBJECTS[subject].topics.map(x=>x[0]);
-}
-
-function scopeFor(subject,mode){
-  if(mode==='month'){
-    const base=monthTopics(subject);
-    return Array.from(new Set([...base,...weakTopicsFor(subject)]));
-  }
-  if(mode==='midterm'){
-    const t=term();
-    if(t===1){
-      const months=[9,10,11].filter(m=>MONTH_SCOPE[m]);
-      return Array.from(new Set(months.flatMap(m=>MONTH_SCOPE[m][subject]).concat(weakTopicsFor(subject))));
-    }
-    return SUBJECTS[subject].topics.map(x=>x[0]);
-  }
-  return SUBJECTS[subject].topics.map(x=>x[0]);
-}
-
-function candidates(subject=selectedSubject,mode=selectedMode){
-  const scope=scopeFor(subject,mode);
+function candidates(){
+  const scope=scopeFor(subject,milestone);
   return BANK[subject].filter(q=>scope.includes(q.topic));
 }
 
-function renderToday(){
-  const t=today(),study=STUDY_WEEK.find(x=>x.day===t.day);
-  $('todayBox').innerHTML='<label>Hôm nay</label><div class="today-main">'+study.label+'</div><div class="week-text">'+study.items.join(' • ')+'</div>';
-}
-
-function renderCurrentCycle(){
-  const mode=currentAutoMode(),m=MODES[mode];
-  $('currentCycle').innerHTML='<div><div class="eyebrow">CHẾ ĐỘ ĐƯỢC ĐỀ XUẤT HÔM NAY</div><h2>'+m.name+' • '+currentMonthLabel()+'</h2><p>'+m.desc+'</p></div><button class="btn primary no-print" id="goCurrent">Làm bài '+m.short.toLowerCase()+'</button>';
-  $('goCurrent').onclick=()=>{selectedMode=mode;switchView('quiz');};
-}
-
-function renderCycleCards(){
-  $('cycleCards').innerHTML=Object.entries(MODES).map(([k,m])=>'<article class="cycle-card '+m.tone+'"><div class="cycle-badge">'+m.short+'</div><h3>'+m.name+'</h3><p>'+m.desc+'</p><div class="cycle-meta"><b>'+m.questions+' câu/môn</b><span>≈ '+m.minutes+' phút</span></div><button class="btn secondary no-print" data-cycle="'+k+'">Chọn dạng này</button></article>').join('');
-  document.querySelectorAll('[data-cycle]').forEach(b=>b.onclick=()=>{selectedMode=b.dataset.cycle;switchView('quiz');});
-}
-
-function renderStudyWeek(){
-  const td=today().day;
-  $('studyWeek').innerHTML=STUDY_WEEK.map(x=>'<article class="day-card '+(x.day===td?'today':'')+'"><h3>'+x.label+(x.day===td?' • Hôm nay':'')+'</h3>'+x.items.map(i=>'<p>'+escapeHtml(i)+'</p>').join('')+'</article>').join('');
-}
-
-function renderTimeline(){
-  $('yearTimeline').innerHTML=TIMELINE.map(x=>'<div class="timeline-item '+x.kind+'"><div class="timeline-dot"></div><div><div class="timeline-head"><strong>'+x.label+'</strong><span>'+x.range+'</span></div><p>'+x.text+'</p></div></div>').join('');
-}
-
-function switchView(v){
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
-  if(v==='quiz'){renderModePicker();renderQuizSubjects();renderQuizSetup();}
-  if(v==='report')renderReport();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function latest(subject,mode=null){
-  return history().find(x=>x.subject===subject&&(!mode||x.mode===mode))||null;
-}
-
-function renderModePicker(){
-  $('modePicker').innerHTML=Object.entries(MODES).map(([k,m])=>'<button class="mode-btn '+(selectedMode===k?'active':'')+'" data-mode="'+k+'"><strong>'+m.name+'</strong><span>'+m.questions+' câu • '+m.minutes+' phút</span></button>').join('');
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{selectedMode=b.dataset.mode;renderModePicker();renderQuizSubjects();renderQuizSetup();});
-}
-
-function renderQuizSubjects(){
-  $('quizSubjectCards').innerHTML=Object.keys(SUBJECTS).map(k=>{
-    const s=SUBJECTS[k],l=latest(k,selectedMode),scope=scopeFor(k,selectedMode);
-    return '<article class="subject-card '+(selectedSubject===k?'active':'')+'" data-subject="'+k+'"><div class="subject-icon">'+s.icon+'</div><h3>'+s.name+'</h3><p>'+scope.length+' chủ đề trong phạm vi</p><div class="latest">'+(l?l.percent+'% • '+l.level:'Chưa làm dạng này')+'</div></article>';
-  }).join('');
-  document.querySelectorAll('.subject-card').forEach(c=>c.onclick=()=>{selectedSubject=c.dataset.subject;renderQuizSubjects();renderQuizSetup();});
-}
-
-function renderQuizSetup(){
-  const s=SUBJECTS[selectedSubject],m=MODES[selectedMode],scope=scopeFor(selectedSubject,selectedMode),cs=candidates();
-  const weak=weakTopicsFor(selectedSubject);
-  $('quizSetup').innerHTML='<div class="quiz-setup-grid"><div><h3 style="margin-top:0">'+s.name+' • '+m.name+'</h3><div class="scope-box"><strong>Phạm vi tự động</strong><div class="scope-tags">'+scope.map(t=>'<span class="pill blue">'+escapeHtml(topicName(selectedSubject,t))+'</span>').join('')+'</div>'+(weak.length?'<p class="muted"><strong>Được cài lại vì từng yếu:</strong> '+weak.map(t=>escapeHtml(topicName(selectedSubject,t))).join(', ')+'</p>':'')+'</div></div><div><div class="exam-spec"><div><b>'+Math.min(m.questions,cs.length)+'</b><span>Câu</span></div><div><b>'+m.minutes+'</b><span>Phút gợi ý</span></div></div><p class="muted">'+m.desc+'</p><button id="startQuizBtn" class="btn primary" style="width:100%">Bắt đầu '+m.name.toLowerCase()+'</button></div></div>';
-  $('startQuizBtn').onclick=startQuiz;
+function renderSetup(){
+  const s=SUBJECTS[subject],m=MILESTONES[milestone],scope=scopeFor(subject,milestone),c=candidates();
+  $('setup').classList.remove('hidden');
+  $('quiz').classList.add('hidden');
+  $('result').classList.add('hidden');
+  $('setup').innerHTML='<div class="setup-grid"><div><div class="eyebrow" style="color:#5b6d85">'+m.name.toUpperCase()+'</div><h2 style="margin:3px 0">'+s.name+'</h2><p class="muted" style="margin:0">'+m.target+' • '+c.length+' câu trong ngân hàng hiện tại</p><div class="scope">'+scope.map(t=>'<span class="pill blue">'+esc(topicName(subject,t))+'</span>').join('')+'</div></div><button id="startBtn" class="btn primary">Bắt đầu kiểm tra</button></div>';
+  $('startBtn').onclick=startQuiz;
 }
 
 function startQuiz(){
-  const cs=candidates(),m=MODES[selectedMode],n=Math.min(m.questions,cs.length);
-  if(!n){toast('Chưa có câu hỏi phù hợp.');return;}
   clearInterval(timer);
-  activeQuiz={subject:selectedSubject,mode:selectedMode,questions:shuffle(cs).slice(0,n),answers:Array(n).fill(null),index:0,started:Date.now()};
-  $('quizSetup').classList.add('hidden');$('quizResult').classList.add('hidden');$('quizRunner').classList.remove('hidden');
-  timer=setInterval(()=>{if(activeQuiz&&$('quizTimer'))$('quizTimer').textContent=fmt(Math.floor((Date.now()-activeQuiz.started)/1000));},1000);
+  const qs=shuffle(candidates());
+  quizState={questions:qs,answers:Array(qs.length).fill(null),index:0,started:Date.now()};
+  $('setup').classList.add('hidden');$('result').classList.add('hidden');$('quiz').classList.remove('hidden');
+  timer=setInterval(()=>{if($('timer')&&quizState)$('timer').textContent=Math.floor((Date.now()-quizState.started)/1000)+' giây';},1000);
   renderQuestion();
 }
 
 function renderQuestion(){
-  const z=activeQuiz,q=z.questions[z.index],sel=z.answers[z.index],answered=z.answers.filter(x=>x!==null).length;
-  const opts=q.options.map((o,i)=>'<label class="answer '+(sel===i?'selected':'')+'"><input type="radio" name="answer" value="'+i+'" '+(sel===i?'checked':'')+'><span><b>'+String.fromCharCode(65+i)+'.</b> '+escapeHtml(o)+'</span></label>').join('');
-  $('quizRunner').innerHTML='<div class="quiz-toolbar"><div><strong>'+SUBJECTS[z.subject].name+' • '+MODES[z.mode].name+'</strong><div class="progress" style="width:230px;max-width:55vw"><div style="width:'+Math.round((z.index+1)/z.questions.length*100)+'%"></div></div></div><div class="progress-meta"><span>'+answered+'/'+z.questions.length+' đã trả lời</span><span id="quizTimer">'+fmt(Math.floor((Date.now()-z.started)/1000))+'</span></div></div><div class="q-number">CÂU '+(z.index+1)+' / '+z.questions.length+' • '+escapeHtml(topicName(z.subject,q.topic))+'</div><div class="q-text">'+escapeHtml(q.text)+'</div><div class="answers">'+opts+'</div><div class="quiz-nav"><button id="prevBtn" class="btn secondary" '+(z.index===0?'disabled':'')+'>← Câu trước</button><div><button id="finishBtn" class="btn secondary">Nộp bài</button> <button id="nextBtn" class="btn primary">'+(z.index===z.questions.length-1?'Nộp bài':'Câu tiếp →')+'</button></div></div>';
-  document.querySelectorAll('input[name=answer]').forEach(r=>r.onchange=()=>{z.answers[z.index]=Number(r.value);renderQuestion();});
-  $('prevBtn').onclick=()=>{if(z.index>0){z.index--;renderQuestion();}};
-  $('nextBtn').onclick=()=>{if(z.index<z.questions.length-1){z.index++;renderQuestion();}else submitQuiz();};
-  $('finishBtn').onclick=submitQuiz;
+  const z=quizState,q=z.questions[z.index],sel=z.answers[z.index];
+  $('quiz').innerHTML='<div class="quiz-head"><strong>'+SUBJECTS[subject].name+' • '+MILESTONES[milestone].name+'</strong><span class="muted">Câu '+(z.index+1)+'/'+z.questions.length+' • <span id="timer">'+Math.floor((Date.now()-z.started)/1000)+' giây</span></span></div><div class="muted">'+esc(topicName(subject,q.topic))+'</div><div class="question">'+esc(q.text)+'</div><div class="answers">'+q.options.map((o,i)=>'<label class="answer '+(sel===i?'selected':'')+'"><input type="radio" name="a" value="'+i+'" '+(sel===i?'checked':'')+'><span><b>'+String.fromCharCode(65+i)+'.</b> '+esc(o)+'</span></label>').join('')+'</div><div class="quiz-nav"><button id="prev" class="btn secondary" '+(z.index===0?'disabled':'')+'>← Câu trước</button><button id="next" class="btn primary">'+(z.index===z.questions.length-1?'Nộp bài':'Câu tiếp →')+'</button></div>';
+  document.querySelectorAll('input[name=a]').forEach(r=>r.onchange=()=>{z.answers[z.index]=Number(r.value);renderQuestion();});
+  $('prev').onclick=()=>{if(z.index>0){z.index--;renderQuestion();}};
+  $('next').onclick=()=>{if(z.index<z.questions.length-1){z.index++;renderQuestion();}else submitQuiz();};
 }
 
 function submitQuiz(){
-  const z=activeQuiz,missing=z.answers.filter(x=>x===null).length;
-  if(missing&&!confirm('Còn '+missing+' câu chưa trả lời. Vẫn nộp bài?'))return;
   clearInterval(timer);
-  let correct=0;const stats={},wrong=[];
+  const z=quizState;let correct=0;const stats={},wrong=[];
   z.questions.forEach((q,i)=>{const ok=z.answers[i]===q.answer;if(ok)correct++;else wrong.push({q,chosen:z.answers[i],num:i+1});if(!stats[q.topic])stats[q.topic]={correct:0,total:0};stats[q.topic].total++;if(ok)stats[q.topic].correct++;});
-  const pct=Math.round(correct/z.questions.length*100),weak=Object.keys(stats).filter(t=>Math.round(stats[t].correct/stats[t].total*100)<70),elapsed=Math.floor((Date.now()-z.started)/1000);
-  const res={date:new Date().toISOString(),mode:z.mode,cycleLabel:MODES[z.mode].name,subject:z.subject,score:correct,total:z.questions.length,percent:pct,level:level(pct),elapsed,weakTopics:weak,topicStats:stats};
-  const h=history();h.unshift(res);write(STORAGE_HISTORY,h.slice(0,300));
-  $('quizRunner').classList.add('hidden');$('quizResult').classList.remove('hidden');renderResult(res,wrong);renderQuizSubjects();activeQuiz=null;
+  const percent=Math.round(correct/z.questions.length*100);
+  const strong=Object.keys(stats).filter(t=>stats[t].correct/stats[t].total>=.75);
+  const weak=Object.keys(stats).filter(t=>stats[t].correct/stats[t].total<.6);
+  const res={date:new Date().toISOString(),milestone,subject,score:correct,total:z.questions.length,percent,level:grade(percent),strongTopics:strong,weakTopics:weak,topicStats:stats};
+  const h=readHistory();h.unshift(res);saveHistory(h.slice(0,200));
+  $('quiz').classList.add('hidden');$('result').classList.remove('hidden');
+  renderResult(res,wrong);renderSubjects();renderSummary();quizState=null;
 }
 
-function advice(r){
-  const names=r.weakTopics.map(t=>topicName(r.subject,t)).join(', ');
-  if(r.percent>=90)return r.mode==='final'?'Đã vững ở mức cuối kỳ. Chuyển sang đề tổng hợp có giới hạn thời gian.':'Duy trì, tháng sau tăng tỷ lệ câu vận dụng.';
-  if(r.percent>=75)return'Chữa toàn bộ câu sai; sau 2–3 ngày làm lại 5 câu ở '+(names||'phần vừa sai')+'.';
-  if(r.percent>=60)return'Ôn lại công thức/quy tắc, rồi làm 8–10 câu cơ bản ở '+(names||'chuyên đề chưa chắc')+'.';
-  return'Chưa tăng độ khó. Học lại nền tảng '+(names||'các phần sai')+' và kiểm tra lại bằng Quiz tháng trước khi chuyển tầng.';
+function recommendation(r){
+  const weak=r.weakTopics.map(t=>topicName(r.subject,t));
+  if(!weak.length&&r.percent>=85)return'Có thể chuyển sang bài khó hơn ở mốc tiếp theo.';
+  if(!weak.length)return'Chữa lại các câu sai rồi làm lại một lượt ngắn sau 2–3 ngày.';
+  return'Học lại: '+weak.join(', ')+'. Sau đó làm 5–10 câu cơ bản của từng phần trước khi kiểm tra lại.';
 }
 
 function renderResult(r,wrong){
-  const stats=Object.keys(r.topicStats).map(t=>{const v=r.topicStats[t],p=Math.round(v.correct/v.total*100),cl=p>=80?'good':p>=60?'warn':'bad';return'<div class="topic-stat"><span>'+escapeHtml(topicName(r.subject,t))+'</span><span class="pill '+cl+'">'+v.correct+'/'+v.total+' • '+p+'%</span></div>';}).join('');
-  const weak=r.weakTopics.length?r.weakTopics.map(t=>'<span class="pill bad">'+escapeHtml(topicName(r.subject,t))+'</span>').join(' '):'<span class="pill good">Không có nhóm lỗi nổi bật</span>';
-  const review=wrong.length?wrong.map(w=>'<div class="review-item"><h4>Câu '+w.num+'. '+escapeHtml(w.q.text)+'</h4><p><strong>Ken chọn:</strong> '+(w.chosen===null?'Chưa trả lời':escapeHtml(w.q.options[w.chosen]))+'</p><p><strong>Đáp án đúng:</strong> '+escapeHtml(w.q.options[w.q.answer])+'</p><div class="explain"><strong>Giải thích:</strong> '+escapeHtml(w.q.explain)+'</div></div>').join(''):'<div class="notice"><strong>Tốt:</strong> Không có câu sai trong lượt này.</div>';
-  $('quizResult').innerHTML='<div class="result-hero"><div class="result-top"><div><div class="eyebrow">'+r.cycleLabel.toUpperCase()+' • '+SUBJECTS[r.subject].name.toUpperCase()+'</div><div class="score-big">'+r.score+'/'+r.total+' • '+r.percent+'%</div><div class="result-level">'+r.level+'</div></div><button id="againBtn" class="btn secondary no-print">Làm bài khác</button></div><div class="metrics"><div class="metric"><b>'+r.score+'/'+r.total+'</b><span>Câu đúng</span></div><div class="metric"><b>'+r.percent+'%</b><span>Chính xác</span></div><div class="metric"><b>'+fmt(r.elapsed)+'</b><span>Thời gian</span></div><div class="metric"><b>'+r.weakTopics.length+'</b><span>Nhóm cần củng cố</span></div></div></div><div class="result-grid"><div class="result-box"><h3>Theo từng chủ đề</h3>'+stats+'</div><div class="result-box"><h3>Cần học nhiều hơn</h3><div>'+weak+'</div><h3 style="margin-top:16px">Nhiệm vụ tiếp theo</h3><p>'+escapeHtml(advice(r))+'</p></div></div><div class="review-list"><h3>Chữa câu sai</h3>'+review+'</div>';
-  $('againBtn').onclick=()=>{$('quizResult').classList.add('hidden');$('quizSetup').classList.remove('hidden');renderQuizSetup();};
-  $('quizResult').scrollIntoView({behavior:'smooth'});
+  const stats=Object.keys(r.topicStats).map(t=>{const v=r.topicStats[t],p=Math.round(v.correct/v.total*100),cl=p>=75?'good':p>=60?'warn':'bad';return'<div class="topic-row"><span>'+esc(topicName(r.subject,t))+'</span><span class="pill '+cl+'">'+v.correct+'/'+v.total+' • '+p+'%</span></div>';}).join('');
+  const strong=r.strongTopics.length?r.strongTopics.map(t=>'<span class="pill good">'+esc(topicName(r.subject,t))+'</span>').join(' '):'<span class="muted">Chưa có phần nào đủ ổn định.</span>';
+  const weak=r.weakTopics.length?r.weakTopics.map(t=>'<span class="pill bad">'+esc(topicName(r.subject,t))+'</span>').join(' '):'<span class="pill good">Không có phần yếu rõ rệt</span>';
+  const review=wrong.length?wrong.map(w=>'<div class="review-item"><h4>Câu '+w.num+'. '+esc(w.q.text)+'</h4><p><strong>Ken chọn:</strong> '+(w.chosen===null?'Chưa trả lời':esc(w.q.options[w.chosen]))+'</p><p><strong>Đúng:</strong> '+esc(w.q.options[w.q.answer])+'</p><div class="explain">'+esc(w.q.explain)+'</div></div>').join(''):'<p class="pill good">Không có câu sai.</p>';
+  $('result').innerHTML='<div class="result-hero"><div class="eyebrow">'+MILESTONES[r.milestone].name.toUpperCase()+' • '+SUBJECTS[r.subject].name.toUpperCase()+'</div><h2>'+r.percent+'% • '+r.level+'</h2><p style="margin:0">'+r.score+'/'+r.total+' câu đúng</p></div><div class="result-grid"><div class="result-box"><h3>Đã vững</h3><div>'+strong+'</div><h3 style="margin-top:16px">Chưa vững</h3><div>'+weak+'</div><h3 style="margin-top:16px">Cần làm tiếp</h3><p>'+esc(recommendation(r))+'</p></div><div class="result-box"><h3>Theo từng phần</h3>'+stats+'</div></div><h3 style="margin:18px 0 8px">Chữa câu sai</h3>'+review+'<div style="margin-top:14px"><button id="again" class="btn primary">Kiểm tra lại</button></div>';
+  $('again').onclick=renderSetup;
 }
 
-function renderWeaknessBoard(){
-  let rows=[];
-  Object.keys(SUBJECTS).forEach(s=>{
-    const ws=weakTopicsFor(s);
-    if(ws.length)rows.push('<div class="weak-row"><strong>'+SUBJECTS[s].name+'</strong><div>'+ws.map(t=>'<span class="pill bad">'+escapeHtml(topicName(s,t))+'</span>').join(' ')+'</div></div>');
-  });
-  $('weaknessBoard').innerHTML='<div class="panel-head" style="padding:0 0 12px"><h3>Chuyên đề cần quay lại</h3><span class="muted">Tính từ các bài gần nhất</span></div>'+(rows.length?rows.join(''):'<p class="muted">Chưa có đủ dữ liệu để xác định điểm yếu.</p>');
-}
-
-function renderReport(){
-  const h=history();
-  $('summaryCards').innerHTML=Object.keys(SUBJECTS).map(k=>{const l=latest(k);return'<article class="summary-card"><h3>'+SUBJECTS[k].name+'</h3><div class="summary-score">'+(l?l.percent+'%':'—')+'</div><p>'+(l?l.level+' • '+(l.cycleLabel||'Bài kiểm tra'):'Chưa có bài kiểm tra')+'</p>'+(l?'<p style="margin-top:5px">Cần chú ý: '+escapeHtml((l.weakTopics||[]).map(t=>topicName(k,t)).join(', ')||'Không có nhóm lỗi nổi bật')+'</p>':'')+'</article>';}).join('');
-  renderWeaknessBoard();
-  $('historyCount').textContent=h.length+' lượt kiểm tra';
-  $('historyBody').innerHTML=h.length?h.map(x=>{const w=(x.weakTopics||[]).map(t=>topicName(x.subject,t)).join(', ')||'—',cl=x.percent>=80?'good':x.percent>=60?'warn':'bad';return'<tr><td>'+new Date(x.date).toLocaleDateString('vi-VN')+'</td><td>'+(x.cycleLabel||x.mode||'Theo tuần')+'</td><td><strong>'+SUBJECTS[x.subject].name+'</strong></td><td>'+x.score+'/'+x.total+' • '+x.percent+'%</td><td><span class="pill '+cl+'">'+x.level+'</span></td><td>'+escapeHtml(w)+'</td></tr>';}).join(''):'<tr><td colspan="6" class="empty">Chưa có dữ liệu. Hãy làm bài đầu tiên.</td></tr>';
-}
-
-function exportData(){
-  const data={exportedAt:new Date().toISOString(),history:history(),studyWeek:STUDY_WEEK,timeline:TIMELINE};
-  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-  a.href=u;a.download='ken-study-cycle-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(u);
+function renderSummary(){
+  $('summary').innerHTML=Object.keys(SUBJECTS).map(k=>{const l=latest(k);return'<div class="summary-card"><h3>'+SUBJECTS[k].name+'</h3><div class="summary-score">'+(l?l.percent+'%':'—')+'</div><p>'+(l?l.level+' • '+MILESTONES[l.milestone].name:'Chưa có kết quả')+'</p></div>';}).join('');
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  selectedMode=currentAutoMode();
-  renderToday();renderCurrentCycle();renderCycleCards();renderStudyWeek();renderTimeline();
-  renderModePicker();renderQuizSubjects();renderQuizSetup();renderReport();
-  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
-  $('printBtn').onclick=()=>window.print();
-  $('exportBtn').onclick=exportData;
+  renderMilestones();renderSubjects();renderSetup();renderSummary();
 });
