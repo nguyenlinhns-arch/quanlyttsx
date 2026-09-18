@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173a70">
+  <meta name="description" content="Ken Weekly Check - kiểm tra kiến thức lớp 9 theo tiến độ từng tuần cho Toán, Tiếng Anh, Vật lí và Hóa học.">
+  <title>Ken Weekly Check • Lớp 9</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <div class="eyebrow">KEN • ÔN THI VÀO LỚP 10</div>
+        <h1>Kiểm tra kiến thức hằng tuần</h1>
+        <p>Đúng tiến độ trên lớp → Quiz → chấm tự động → chỉ ra phần cần học lại.</p>
+      </div>
+      <div class="week-box">
+        <label for="weekInput">Tuần kiểm tra</label>
+        <input id="weekInput" type="week" aria-label="Tuần kiểm tra">
+        <div id="weekText" class="week-text"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="tabs no-print" aria-label="Điều hướng">
+      <button class="tab active" data-view="plan">1. Tiến độ tuần</button>
+      <button class="tab" data-view="quiz">2. Làm Quiz</button>
+      <button class="tab" data-view="report">3. Kết quả & lịch sử</button>
+    </nav>
+
+    <section id="view-plan" class="view active">
+      <div class="notice">
+        <strong>Nguyên tắc:</strong> chỉ tích những chủ đề Ken đã học hoặc đang ôn trong tuần. Quiz sẽ tự lọc theo đúng các chủ đề được chọn.
+      </div>
+      <div class="section-title">
+        <div><h2>Nội dung đã học tuần này</h2><p>Chọn phạm vi cho từng môn; có thể ghi thêm bài cụ thể của giáo viên.</p></div>
+        <button id="starterBtn" class="btn secondary no-print">Gợi ý đầu năm</button>
+      </div>
+      <div id="planGrid" class="subject-plan-grid"></div>
+      <div class="action-row no-print">
+        <button id="savePlanBtn" class="btn primary">Lưu tiến độ tuần</button>
+        <span id="savePlanStatus" class="save-status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section id="view-quiz" class="view">
+      <div class="section-title">
+        <div><h2>Quiz kiểm tra nhanh</h2><p>Mỗi lần làm lấy ngẫu nhiên câu hỏi trong đúng phạm vi đã học.</p></div>
+      </div>
+      <div id="quizSubjectCards" class="subject-cards"></div>
+      <div id="quizSetup" class="panel quiz-setup"></div>
+      <div id="quizRunner" class="panel quiz-runner hidden"></div>
+      <div id="quizResult" class="hidden"></div>
+    </section>
+
+    <section id="view-report" class="view">
+      <div class="section-title">
+        <div><h2>Theo dõi tiến bộ</h2><p>Điểm gần nhất theo môn, lỗi nổi bật và lịch sử các lần kiểm tra.</p></div>
+        <div class="action-row compact no-print">
+          <button id="printBtn" class="btn secondary">In báo cáo</button>
+          <button id="exportBtn" class="btn secondary">Xuất dữ liệu</button>
+        </div>
+      </div>
+      <div id="summaryCards" class="summary-grid"></div>
+      <div class="panel history-panel">
+        <div class="panel-head"><h3>Lịch sử làm bài</h3><span id="historyCount" class="muted"></span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Ngày</th><th>Tuần</th><th>Môn</th><th>Kết quả</th><th>Mức</th><th>Nội dung cần củng cố</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p>Dữ liệu kết quả được lưu trên trình duyệt của thiết bị này. Phiên bản hiện tại tập trung: Toán • Tiếng Anh • Vật lí • Hóa học.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
